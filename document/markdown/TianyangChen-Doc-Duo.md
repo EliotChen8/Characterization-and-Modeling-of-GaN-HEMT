@@ -178,6 +178,8 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 这一部分将总结所有从IC-CAP当中读取的参数。
 
+关于这些参数的定义，请查阅上文的所有参数列表，或significant parameter的列表。这一部分主要结合ICCAP的数据提取这些参数。
+
 #### ==Manual Extractions==
 
 由于IC-CAP的软件问题，在extract和tuning的过程中有一系列参数并不能被有效提取，因此我们进行一系列的手动提取，来获得能够被用于建模的参数。
@@ -271,7 +273,7 @@ S参数的仿真电路如下：
 
 但是，目前我依然存在一个问题，没有解决：RF的测量默认显示为线，但是仿真结果只能选择散点一种形式。这极大程度上不利于呈现仿真结果的观察。我注意到在Angelov的论文当中也使用了相似的数据呈现形式，我怀疑这是一个ADS仿真过程中普遍存在的问题。
 
-#### ==Optimisation of Significant Parameters in ADS==
+#### ==Optimization of Significant Parameters in ADS==
 
 这一部分将结合上述核心参数列表，主要从仿真结果的角度出发，说明各个参数对于仿真结果的影响
 
