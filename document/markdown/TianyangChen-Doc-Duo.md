@@ -141,7 +141,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 ## ==Modeling==
 
-### ==Angelov GaN Parameters==
+### Angelov GaN Parameters
 
 #### All Parameters
 
@@ -160,6 +160,8 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 >
 > 对于每个参数，基于本次项目中获得的经验，主要有三种获取信息的来源：来自ICCAP的计算，来自manual提取参数的程序，和根据fitting结果的tuning。在表格中，我分别用ICC, MAN, TUN代表信息的来源，其中1代表该参数信息可以在这一过程中获取。
 
+DC Characters and Polynomial Coefficients:
+
 | Parameter | Definition and Description                                   | ICC  | MAN  | TUN  |
 | --------- | ------------------------------------------------------------ | ---- | ---- | ---- |
 | Ipk0      | Value of drain current (id) at maximum transconductance (gm) | 1    | 0    | 1    |
@@ -173,6 +175,8 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 | Lambda    | Channel length modulation parameter                          | 0    | 0    | 1    |
 | Lambda1   | Channel length modulation parameter                          | 0    | 0    | 1    |
 | Ij        | Gate forward saturation current                              | 0    | 0    | 1    |
+
+Capacitance Parameters and Polynomial Coefficients:
 
 | Parameter | Definition and Description             | ICC  | MAN  | TUN  |
 | --------- | -------------------------------------- | ---- | ---- | ---- |
@@ -191,6 +195,8 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 | P40       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
 | P41       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
 
+Resistance and Inductance Parameters:
+
 | Parameter | Definition and Description | ICC  | MAN  | TUN  |
 | --------- | -------------------------- | ---- | ---- | ---- |
 | Rg        | Gate resistance            | 1    | 0    | 1    |
@@ -204,25 +210,98 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 
 
-### ==IC-CAP Extraction Flow== 
+### IC-CAP Extraction Flow 
 
-#### ==Extraction Flow Overview==
+#### Extraction Flow Overview
 
 这一部分将介绍IC-CAP软件原生设计的参数提取流程。
 
-#### ==Debugging==
+![image-20240830164602889](assets/image-20240830164602889.png)
 
-这一部分将介绍实际运行Extraction Flow之前的debug过程。当然，并不是所有问题都能被解决。因此在本次工作中，我们只使用IC-CAP计算了一部分参数。之后我们会基于这些参数来手动提取剩余的参数。
+具体而言，整个流程主要分为7个大的部分，每个部分包含着软件中显示的extraction setup，在这些setup当中，我么可以的得到我们需要的参数，具体情况如下所示：
+
+1. **Initialize:**
+   1. Reset Parameter to Defaults:
+   2. Initialize Parameter and Boundaries for Extraction:
+   3. Update All Measures Data for Extraction:
+2. **Port Res:**
+   1. PreDC Port1:
+   2. PreDC Port2:
+3. **Cold FET:**
+   1. SP Cold FET:
+4. **Gate Diode:**
+   1. DC gate diode forward:
+   2. DC gate diode reverse:
+5. **DC idvd & idvg:**
+   1. DC idvg:
+   2. DC idvd:
+   3. DC idvg:
+   4. DC idvd:
+   5. DC idvg:
+6. **SP vg & vd:**
+   1. SP vg at vd0 A1:
+   2. SP vg at vg0:
+   3. SP vg at vd0 A1:
+   4. SP vg at vg0:
+   5. SP vg at vgm2:
+7. **Finalize:**
+   1. Save Parameters:
+
+当然，这个流程不是完美的，尤其是在拟合过程中将会出现大量error。根据我的测试，软件中自带的extract flow甚至不能完整运行自带的demo程序，且debug过程相当复杂。
+
+根据与教授的沟通，教授告诉我软件并不是万能的，我们应该以软件作为自己的启发，但回归论文寻找更清晰的答案。因此在本次工作中，我们的目的是：
+
+1. 能够完整的运行整个extract flow；
+2. 使用IC-CAP计算了一部分参数；
+3. 之后，我们会基于这些参数和论文中的定义来手动提取剩余的参数；
+4. 最终，根据ADS的tuning结果来得到所有参数。
+
+#### Debugging
+
+这一部分将介绍实际运行Extraction Flow之前的debug过程。
+
+如果使用软件自带的程序，由于其必须要提取一系列温度敏感性相关的参数，系统会强制要求测量两个温度下期间的character。具体而言，软件会禁止我们选择shrink list。
+
+![image-20240830165650120](assets/image-20240830165650120.png)
+
+但是本次暑期科研的测试平台只支持测量室温一个温度下的数据，这和软件产生了冲突。
+
+在参数提取过程中，这个问题会被体现出来。具体而言，软件在初始化过程中会中断，并禁止我们继续进行参数提取，这将使我们完全不能从IC-CAP当中提取所有参数。
+
+为了解决这一问题，我们可以进行以下操作
+
+- 选中室温（Tnom）下的测试数据，并导出；
+- 选中另外一个温度的对应setup，导入室温下的数据；
+- 请不要忘记：在这一步选择Copy Tnom Settings，否则程序将会依旧无法运行。
+
+此时运行测试流程，程序将可以运行，运行中主要会出现三种报错：
+
+- 优化函数显示 Data Unchanged，这是相对正常的，说明拟合结果已经达到了最好；
+- 优化函数中断并显示仿真器出错，这是相对难以处理的问题。我们可以选择从上一步重新运行，大多数情况下这一种错误将会消失；
+- 在terminal的output显示较大误差，且数据不变，这种情况需要分类讨论：
+  - 如果是参数触及了仿真前设置的极限，可以尝试调整极限；
+  - 但是绝大多数情况下，函数就是不工作；
+    事实上，我曾经花了一个星期来研究这个问题，但是没有得到一个明确的答案；
+    也正是在此时教授提醒了我，让我不要迷恋于这个软件。
 
 
 
-### ==Parameter Extractions==
+### Parameter Extractions
 
 #### ==IC-CAP Data Output==
 
 这一部分将总结所有从IC-CAP当中读取的参数。
 
 关于这些参数的定义，请查阅上文的所有参数列表，或significant parameter的列表。这一部分主要结合ICCAP的数据提取这些参数。
+
+以下是所有参数的读取过程和采用值：
+
+1. DC Characters and Polynomial Coefficients:
+   - 
+2. Capacitance Parameters and Polynomial Coefficients:
+   - 
+3. Resistance and Inductance Parameters:
+   - 
 
 #### ==Manual Extractions==
 
