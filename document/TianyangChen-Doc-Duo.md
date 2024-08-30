@@ -271,7 +271,7 @@ S参数的仿真电路如下：
 
 但是，目前我依然存在一个问题，没有解决：RF的测量默认显示为线，但是仿真结果只能选择散点一种形式。这极大程度上不利于呈现仿真结果的观察。我注意到在Angelov的论文当中也使用了相似的数据呈现形式，我怀疑这是一个ADS仿真过程中普遍存在的问题。
 
-#### ==Optimisation of Significant Parameters in ADS==
+#### ==Optimization of Significant Parameters in ADS==
 
 这一部分将结合上述核心参数列表，主要从仿真结果的角度出发，说明各个参数对于仿真结果的影响
 
