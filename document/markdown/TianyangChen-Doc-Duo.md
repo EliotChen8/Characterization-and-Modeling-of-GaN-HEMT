@@ -150,7 +150,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 对于本次项目中使用的模型，所有参数的名称，定义和默认值，请见[Appendix 4.1](### Keysight: Angelov-GaN Parameters Definitions and Default Values)
 
-#### ==List of Significant Parameters==
+#### List of Significant Parameters
 
 并非所有参数都将对最终的仿真结果产生实质性影响。同时，由于ICCAP和ADS使用的仿真器版本不一定一致，有相当一部分参数将在ADS的仿真器中出现，但是并不会被ICCAP所提取。不过幸运的是：经过测试，这一系列参数基本不会对最终的fitting结果产生实质性影响。
 
@@ -205,8 +205,6 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 
 ### ==IC-CAP Extraction Flow== 
-
-这一部分将介绍基于IC-CAP的参数提取过程。
 
 #### ==Extraction Flow Overview==
 
