@@ -156,6 +156,52 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 对于将会对仿真结果产生实质性影响，且支持从ICCAP中进行提取的参数，我整理如下：
 
+> 根据参数的类型和对最终结果的影响，我将参数分为以下三组；
+>
+> 对于每个参数，基于本次项目中获得的经验，主要有三种获取信息的来源：来自ICCAP的计算，来自manual提取参数的程序，和根据fitting结果的tuning。在表格中，我分别用ICC, MAN, TUN代表信息的来源，其中1代表该参数信息可以在这一过程中获取。
+
+| Parameter | Definition and Description                                   | ICC  | MAN  | TUN  |
+| --------- | ------------------------------------------------------------ | ---- | ---- | ---- |
+| Ipk0      | Value of drain current (id) at maximum transconductance (gm) | 1    | 0    | 1    |
+| Vpks      | Gate voltage (Vg) at maximum transconductance (gm)           | 1    | 0    | 1    |
+| Dvpks     | Change in gate voltage at peak transconductance              | 0    | 0    | 1    |
+| P1        | Polynomial coefficient for channel current at peak gm        | 0    | 1    | 1    |
+| P2        | Polynomial coefficient for channel current                   | 0    | 0    | 1    |
+| P3        | Polynomial coefficient for channel current                   | 0    | 0    | 1    |
+| Alphar    | Saturation parameter alpha r                                 | 0    | 0    | 1    |
+| Alphas    | Saturation parameter alpha                                   | 0    | 0    | 1    |
+| Lambda    | Channel length modulation parameter                          | 0    | 0    | 1    |
+| Lambda1   | Channel length modulation parameter                          | 0    | 0    | 1    |
+| Ij        | Gate forward saturation current                              | 0    | 0    | 1    |
+
+| Parameter | Definition and Description             | ICC  | MAN  | TUN  |
+| --------- | -------------------------------------- | ---- | ---- | ---- |
+| Cds       | Zero-bias drain-source capacitance     | 1    | 0    | 1    |
+| Cgspi     | Gate-source pinch-off capacitance      | 1    | 0    | 1    |
+| Cgs0      | Gate-source capacitance parameter      | 1    | 0    | 1    |
+| Cgdpi     | Gate-drain pinch-off capacitance       | 1    | 0    | 1    |
+| Cgd0      | Gate-drain capacitance parameter       | 1    | 0    | 1    |
+| Cgdpe     | External gate-drain capacitance        | 1    | 0    | 1    |
+| P10       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P11       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P20       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P21       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P30       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P31       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P40       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+| P41       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
+
+| Parameter | Definition and Description | ICC  | MAN  | TUN  |
+| --------- | -------------------------- | ---- | ---- | ---- |
+| Rg        | Gate resistance            | 1    | 0    | 1    |
+| Rd        | Drain resistance           | 1    | 0    | 1    |
+| Rs        | Source resistance          | 1    | 0    | 1    |
+| Ri        | Input resistance           | 1    | 0    | 1    |
+| Rgd       | Non-ohmic gate resistance  | 1    | 0    | 1    |
+| Lg        | Gate inductance            | 1    | 0    | 1    |
+| Ld        | Drain inductance           | 1    | 0    | 1    |
+| Ls        | Source inductance          | 1    | 0    | 1    |
+
 
 
 ### ==IC-CAP Extraction Flow== 
