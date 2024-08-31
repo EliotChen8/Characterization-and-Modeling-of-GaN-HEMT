@@ -139,7 +139,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 <div STYLE="page-break-after: always;"></div>
 
-## ==Modeling==
+## Modeling
 
 ### Angelov GaN Parameters
 
@@ -218,32 +218,32 @@ Resistance and Inductance Parameters:
 
 ![image-20240830164602889](assets/image-20240830164602889.png)
 
-具体而言，整个流程主要分为7个大的部分，每个部分包含着软件中显示的extraction setup，在这些setup当中，我么可以的得到我们需要的参数，具体情况如下所示：
+具体而言，整个流程主要分为7个大的部分，每个部分包含着软件中显示的extraction setup，在这些setup当中，我么可以的得到我们需要的参数，具体情况如下所示（对于提取出核心参数的步骤进行了加粗）：
 
 1. **Initialize:**
    1. Reset Parameter to Defaults:
    2. Initialize Parameter and Boundaries for Extraction:
    3. Update All Measures Data for Extraction:
 2. **Port Res:**
-   1. PreDC Port1:
-   2. PreDC Port2:
+   1. **PreDC Port1: Z1;**
+   2. **PreDC Port2: Z2;**
 3. **Cold FET:**
-   1. SP Cold FET:
+   1. **SP Cold FET: Rg, Rd, Rs, Lg, Ld, Ls;**
 4. **Gate Diode:**
    1. DC gate diode forward:
    2. DC gate diode reverse:
 5. **DC idvd & idvg:**
-   1. DC idvg:
+   1. **DC idvg: Ipk0, Vpks**
    2. DC idvd:
    3. DC idvg:
    4. DC idvd:
    5. DC idvg:
 6. **SP vg & vd:**
-   1. SP vg at vd0 A1:
+   1. SP vg at vd0 A1: 
    2. SP vg at vg0:
-   3. SP vg at vd0 A1:
-   4. SP vg at vg0:
-   5. SP vg at vgm2:
+   3. **SP vg at vd0 A1: Cgs0, Cgspi, Cds, Cgd0, Cgdpi, Ri, Rgd;**
+   4. **SP vg at vg0: Cgs0, Cgspi, Cds, Cgd0, Cgdpi**
+   5. **SP vg at vgm2: Cgdpe**
 7. **Finalize:**
    1. Save Parameters:
 
@@ -262,7 +262,7 @@ Resistance and Inductance Parameters:
 
 如果使用软件自带的程序，由于其必须要提取一系列温度敏感性相关的参数，系统会强制要求测量两个温度下期间的character。具体而言，软件会禁止我们选择shrink list。
 
-![image-20240830165650120](assets/image-20240830165650120.png)
+<img src="assets/image-20240830165650120.png" alt="image-20240830165650120" style="zoom: 80%;" />
 
 但是本次暑期科研的测试平台只支持测量室温一个温度下的数据，这和软件产生了冲突。
 
@@ -282,34 +282,396 @@ Resistance and Inductance Parameters:
   - 如果是参数触及了仿真前设置的极限，可以尝试调整极限；
   - 但是绝大多数情况下，函数就是不工作；
     事实上，我曾经花了一个星期来研究这个问题，但是没有得到一个明确的答案；
-    也正是在此时教授提醒了我，让我不要迷恋于这个软件。
+    也正是在此时教授提醒了我，让我不要盲目相信这个软件。
 
 
 
 ### Parameter Extractions
 
-#### ==IC-CAP Data Output==
+#### IC-CAP Data Output
 
 这一部分将总结所有从IC-CAP当中读取的参数。
 
 关于这些参数的定义，请查阅上文的所有参数列表，或significant parameter的列表。这一部分主要结合ICCAP的数据提取这些参数。
 
-以下是所有参数的读取过程和采用值：
+以下是所有参数的读取过程：
 
-1. DC Characters and Polynomial Coefficients:
-   - 
-2. Capacitance Parameters and Polynomial Coefficients:
-   - 
-3. Resistance and Inductance Parameters:
-   - 
+DC Characters and Polynomial Coefficients:
 
-#### ==Manual Extractions==
+- Vpks: -0.1
+
+  gm峰值位于-0.1~0之间
+
+  <img src="assets/image-20240830181803658.png" alt="image-20240830181803658" style="zoom: 25%;" />
+
+- Ipks: 0.033
+
+  读取-0.1时候的电流值
+
+  <img src="assets/image-20240830182147730.png" alt="image-20240830182147730" style="zoom:25%;" />
+
+Capacitance Parameters and Polynomial Coefficients:
+
+- 根据帮助文档：
+
+  <img src="assets/image-20240830183502777.png" alt="image-20240830183502777" style="zoom: 67%;" />
+
+  我们得到以下结果：
+
+  <img src="assets/image-20240830185147132.png" alt="image-20240830185147132" style="zoom: 33%;" />
+
+  - Cgs0: 83;
+  - Cgspi: 88;
+  - Cds: 29;
+  - Cgd0: 53;
+  - Cgdpi: 44;
+
+- 再根据帮助文档：
+
+  <img src="assets/image-20240830190459048.png" alt="image-20240830190459048" style="zoom:67%;" />
+
+  我们针对相同的参数组合又得到了结果：
+
+  <img src="assets/image-20240830185843868.png" alt="image-20240830185843868" style="zoom: 33%;" />
+
+  - Cgs0: 20;
+  - Cgspi: 150;
+  - Cds: 20;
+  - Cgd0: 93;
+  - Cgdpi: 5;
+
+  令人担忧的是，这三个曲线并不符合帮助文档中呈现的趋势。
+
+- 最终根据帮助文档：
+
+  <img src="assets/image-20240830190148155.png" alt="image-20240830190148155" style="zoom:67%;" />
+
+  观察测量结果：
+
+  <img src="assets/image-20240830190213591.png" alt="image-20240830190213591" style="zoom: 25%;" />
+
+  Cgdpe:5.2;
+
+Resistance and Inductance Parameters:
+
+- 根据帮助文档，这一部分的数据主要来源于 Cold FET 的 setup
+
+  <img src="assets/image-20240830192426827.png" alt="image-20240830192426827" style="zoom:67%;" />
+
+  根据；论文叙述，提取电阻值应该使用低频的flat range，电感值应使用高频的flat range
+
+  <img src="assets/image-20240830193841287.png" alt="image-20240830193841287" style="zoom:33%;" />
+
+  读出以下电阻值：
+
+  - Rg: 25.2;
+  - Rd: 13.0;
+  - Rs: 9.2;
+
+  读出以下电容值：
+
+  - Lg: 20.0;
+  - Ld: 39.4;
+  - Ls: -9.4;
+
+  这里有两点非常令人担心：
+
+  1. Demo Project和这里的低频都没有呈现出flat range；
+  2. Ls得到的不是正数。
+
+- 接下来读取Ri:
+
+  <img src="assets/image-20240830195421595.png" alt="image-20240830195421595" style="zoom:33%;" />
+
+  Ri = 8.0;
+
+- 最终读取Rgd
+
+  <img src="assets/image-20240830200543270.png" alt="image-20240830200543270" style="zoom:33%;" />
+
+  Rgd = 27.2.
+
+#### Manual Extractions
 
 由于IC-CAP的软件问题，在extract和tuning的过程中有一系列参数并不能被有效提取，因此我们进行一系列的手动提取，来获得能够被用于建模的参数。
 
+DC Characters and Polynomial Coefficients:
+
+- P1：这一步通过计算峰值处的gm与对应的id之比得到：
+
+  <img src="assets/image-20240830204111216.png" alt="image-20240830204111216" style="zoom: 33%;" />
+  $$
+  P1 = \frac{gm_{max}}{Id} = \frac{35.79}{33.13} = 1.08
+  $$
+
+Capacitance Parameters and Polynomial Coefficients:
+
+在这一部分，我们需要：
+
+1. 我们首先需要根据帮助文档中提供的信息，确定提取参数需将数据抄写至MATLAB；
+2. 基于论文中参数的定义，进行相关的函数运算，并进行线性拟合。
+
+具体而言，我们按照以下方式完成这一过程：
+
+首先，我们阅读帮助文档中对电容多项式参数的表述：
+
+<img src="assets/image-20240830223545909.png" alt="image-20240830223545909" style="zoom: 33%;" />
+
+然后，我们将数据导入MATLAB：
+
+```matlab
+vg = [-3:0.2:0];
+cgsvg = [85.67,86.18,86.87,88.15,88.43,89.28,90.35,91.66,95.31,108.2,126.0,139.6,151.1,160.5,167.7,172.5];
+cgdvg = [41.4,42.0,42.6,43.6,44.1,44.9,45.6,46.9,49.0,56.7,69.6,80.8,88.6,93.6,96.6,98.9];
+
+vd = [0:1:28];
+cgsvd = [172.8,163.4,153.5,152.1,152.2,155.0,157.1,158.8,160.2,161.6,162.9,164.3,165.5,166.6,168.0,168.2,168.5,168.9,169.4,169.7,170.1,170.3,170.0,170.1,170.2,170.4,170.4,170.3,170.2];
+cgdvd = [98.8,76.0,49.8,39.5,31.7,25.1,19.4,15.3,12.5,10.6,9.2,8.1,7.2,6.6,6.0,5.6,5.2,4.9,4.6,4.4,4.2,4.1,3.9,3.7,3.6,3.6,3.5,3.4,3.4];
+
+cgspi =     88;
+cgs0 =      83;
+cgdpi =     44;
+cgd0 =      53;
+```
+
+我们可以进行绘图，来确保数据的正确性：
+
+<img src="assets/image-20240830214409838.png" alt="image-20240830214409838" style="zoom: 50%;" />
+
+我们可以查阅这一过程在文章中的表达：
+
+<img src="assets/image-20240830214703000.png" alt="image-20240830214703000" style="zoom:50%;" />
+
+其中：
+
+<img src="assets/image-20240830214715663.png" alt="image-20240830214715663" style="zoom:50%;" />
+
+接下来，我们以此对上述参数进行计算
+
+- **P11 P10:**
+
+  我们计算以下函数：
+
+  <img src="assets/image-20240830220206120.png" alt="image-20240830220206120" style="zoom:50%;" />
+
+  我们通过MATLAB进行运算，并进行线性拟合：
+
+  ```MATLAB
+  % p11vgs+p10
+  y1 = atanh(((cgsvg-cgspi)/(cgs0))-1);
+  
+  % Find indices for vg between -1.4 and -0.6
+  idx = find(vg >= -1.7 & vg <= -0.9);
+  
+  % Linear fit for y1 over the selected range of vg
+  p11p10 = polyfit(vg(idx), y1(idx), 1)  
+  % Linear fit, p(1) is slope, p(2) is intercept
+  
+  % Generate values from linear fit
+  y_fit = polyval(p11p10, vg(idx));
+  
+  % Plotting
+  clf;
+  plot(vg, y1, 'b-', 'DisplayName', 'Original y1'); hold on;
+  plot(vg(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
+  ```
+
+  运行结果如下，这一步忽略了虚部，但没有影响最终结果：
+
+  <img src="assets/image17250704836580.png" alt="img" style="zoom:67%;" />
+
+  最终我们得到：
+
+  ```
+  p11p10 = 1×2
+      2.2086    1.6136
+  ```
+
+- **P41 P40:**
+
+  我们计算以下函数：
+
+  <img src="assets/image-20240830220238640.png" alt="image-20240830220238640" style="zoom:50%;" />
+
+  我们通过MATLAB进行运算，并进行线性拟合：
+
+  ```MATLAB
+  % p41vds+p40
+  y4 = atanh(((cgdvg-cgdpi)/cgd0)-1);
+  
+  % Find indices for vg between -1.4 and -0.6
+  idx = find(vg >= -1.5 & vg <= -0.8);
+  
+  % Linear fit for y1 over the selected range of vg
+  p41p40 = polyfit(vg(idx), y4(idx), 1)  
+  % Linear fit, p(1) is slope, p(2) is intercept
+  
+  % Generate values from linear fit
+  y_fit = polyval(p41p40, vg(idx));
+  
+  % Plotting
+  clf;
+  plot(vg, y4, 'b-', 'DisplayName', 'Original y1'); hold on;
+  plot(vg(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
+  ```
+
+  运行结果如下这一步忽略了虚部，但没有影响最终结果：
+
+  <img src="assets/image17250704696440.png" alt="img" style="zoom:67%;" />
+
+  最终我们得到：
+
+  ```
+  p41p40 = 1×2
+      1.9931    1.3454
+  ```
+
+- **P21 P20:**
+
+  我们计算以下函数：
+
+  <img src="assets/image-20240830220307897.png" alt="image-20240830220307897" style="zoom:50%;" />
+
+  我们通过MATLAB进行运算，并进行线性拟合：
+
+  ```MATLAB
+  % p21vds+p20
+  p10 = p11p10(2)
+  y2 = atanh(((cgsvd-cgspi)/(cgs0*(1+tanh(p10))))-1);
+  
+  % Find indices for vg between -1.4 and -0.6
+  idx = find(vd >= 0 & vd <= 3);
+  
+  % Linear fit for y1 over the selected range of vg
+  p21p20 = polyfit(vd(idx), y2(idx), 1)  
+  % Linear fit, p(1) is slope, p(2) is intercept
+  
+  % Generate values from linear fit
+  y_fit = polyval(p21p20, vd(idx));
+  
+  % Plotting
+  clf;
+  plot(vd, y2, 'b-', 'DisplayName', 'Original y1'); hold on;
+  plot(vd(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
+  ```
+
+  运行结果如下：
+
+  <img src="assets/image17250704995060.png" alt="img" style="zoom:67%;" />
+
+  最终我们得到：
+
+  ```
+  p21p20 = 1×2
+     -0.0637   -0.5204
+  ```
+
+  ==这一步存在问题：Simulator支持的P21最小值为0.1。==
+
+- **P31 P30:**
+
+  我们计算以下函数：
+
+  <img src="assets/image-20240830220325701.png" alt="image-20240830220325701" style="zoom:50%;" />
+
+  我们通过MATLAB进行运算，并进行线性拟合：
+
+  ```MATLAB
+  % p31vds+p30
+  p40 = p41p40(2)
+  p41 = p41p40(1)
+  
+  y3 = zeros(size(vd));
+  
+  for i = 1:length(vd)
+      tanh_value = tanh(p40 - p41 * vd(i));
+      y3(i) = (atanh(((cgdvd(i) - cgdpi)/(cgd0 * (1 + tanh_value))) - 1));
+  end
+  
+  % Find indices for vg between -1.4 and -0.6
+  idx = find(vd >= 0.1 & vd <= 3);
+  
+  % Linear fit for y1 over the selected range of vg
+  p31p30 = polyfit(vd(idx), y3(idx), 1)  
+  % Linear fit, p(1) is slope, p(2) is intercept
+  
+  % Generate values from linear fit
+  y_fit = polyval(p31p30, vd(idx));
+  
+  % Plotting
+  clf;
+  plot(vd, y3, 'b-', 'DisplayName', 'Original y1'); hold on;
+  plot(vd(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
+  ```
+
+  运行结果如下，这一步忽略了虚部，**且影响最终结果**：
+
+  <img src="assets/image17250717725520.png" alt="img" style="zoom:67%;" />
+
+  最终我们得到：
+
+  ```
+  p31p30 = 1×2 complex
+    -0.2156 - 0.7854i   0.6075 + 1.5708i
+  ```
+
+  ==也就是在这一步中产生了虚数，这是不能被simulator利用的。==
+
+#### Result of Extractions
+
+截止到这步，我们已经得到的数据如下所示，其中存在问题的数据已高亮显示：
+
+DC Characters and Polynomial Coefficients:
+
+| Parameter | Definition and Description                                   | Original Value |
+| --------- | ------------------------------------------------------------ | -------------- |
+| Ipk0      | Value of drain current (id) at maximum transconductance (gm) | 0.033          |
+| Vpks      | Gate voltage (Vg) at maximum transconductance (gm)           | -0.1           |
+| Dvpks     | Change in gate voltage at peak transconductance              | ==NA==         |
+| P1        | Polynomial coefficient for channel current at peak gm        | 1.08           |
+| P2        | Polynomial coefficient for channel current                   | ==NA==         |
+| P3        | Polynomial coefficient for channel current                   | ==NA==         |
+| Alphar    | Saturation parameter alpha r                                 | ==NA==         |
+| Alphas    | Saturation parameter alpha                                   | ==NA==         |
+| Lambda    | Channel length modulation parameter                          | ==NA==         |
+| Lambda1   | Channel length modulation parameter                          | ==NA==         |
+| Ij        | Gate forward saturation current                              | ==NA==         |
+
+Capacitance Parameters and Polynomial Coefficients:
+
+| Parameter | Definition and Description             | Original Value  |
+| --------- | -------------------------------------- | --------------- |
+| Cds       | Zero-bias drain-source capacitance     | 29              |
+| Cgspi     | Gate-source pinch-off capacitance      | 88              |
+| Cgs0      | Gate-source capacitance parameter      | 83              |
+| Cgdpi     | Gate-drain pinch-off capacitance       | 44              |
+| Cgd0      | Gate-drain capacitance parameter       | 53              |
+| Cgdpe     | External gate-drain capacitance        | 5.2             |
+| P10       | Polynomial coefficient for capacitance | 1.61            |
+| P11       | Polynomial coefficient for capacitance | 2.21            |
+| P20       | Polynomial coefficient for capacitance | -0.52           |
+| P21       | Polynomial coefficient for capacitance | ==-0.06==       |
+| P30       | Polynomial coefficient for capacitance | ==0.61+1.57i==  |
+| P31       | Polynomial coefficient for capacitance | ==-0.22-0.79i== |
+| P40       | Polynomial coefficient for capacitance | 1.35            |
+| P41       | Polynomial coefficient for capacitance | 1.99            |
+
+Resistance and Inductance Parameters:
+
+| Parameter | Definition and Description | Original Value |
+| --------- | -------------------------- | -------------- |
+| Rg        | Gate resistance            | 25.2           |
+| Rd        | Drain resistance           | 13             |
+| Rs        | Source resistance          | 9.2            |
+| Ri        | Input resistance           | 8.0            |
+| Rgd       | Non-ohmic gate resistance  | 27.2           |
+| Lg        | Gate inductance            | 20.0           |
+| Ld        | Drain inductance           | 39.4           |
+| Ls        | Source inductance          | ==-9.4==       |
 
 
-### ==Simulations and Optimizations==
+
+### Simulations and Optimizations
 
 #### Export IC-CAP Models to ADS
 
@@ -396,6 +758,29 @@ S参数的仿真电路如下：
 
 但是，目前我依然存在一个问题，没有解决：RF的测量默认显示为线，但是仿真结果只能选择散点一种形式。这极大程度上不利于呈现仿真结果的观察。我注意到在Angelov的论文当中也使用了相似的数据呈现形式，我怀疑这是一个ADS仿真过程中普遍存在的问题。
 
+#### Original Results
+
+我们直接将Extract出来的函数输入仿真器，观察结果。蓝色是测量，红色是仿真。
+
+DC的仿真结果如下：
+
+![image-20240830225750849](assets/image-20240830225750849.png)
+
+对于S参数，我们仿真三个场景。第一个是cold FET：
+
+<img src="assets/image-20240830230104666.png" alt="image-20240830230104666" style="zoom:45%;" />
+
+第二个是在没有施加Vds的前提下，扫描Vgs：
+
+<img src="assets/image-20240830230634926.png" alt="image-20240830230634926" style="zoom:33%;" />
+
+第三个是在Vgs=1.75，这里是gm pinch off的地方，我们从0-28V扫描Vds：
+
+<img src="assets/image-20240830230305278.png" alt="image-20240830230305278" style="zoom:33%;" />
+
+> 看到结果的时候心都要碎了，
+> 因为教授会说我的结果看起来很funny。
+
 #### ==Optimization of Significant Parameters in ADS==
 
 这一部分将结合上述核心参数列表，主要从仿真结果的角度出发，说明各个参数对于仿真结果的影响
@@ -408,9 +793,13 @@ S参数的仿真电路如下：
 
 这一部分将介绍目前最新得到的仿真结果，并对目前存在的困难进行分析。
 
-DC 仿真与测量的拟合情况
+DC的仿真结果如下：
 
-RF 仿真与测量的拟合情况
+对于S参数，我们仿真三个场景。第一个是cold FET：
+
+第二个是在没有施加Vds的前提下，扫描Vgs：
+
+第三个是在Vgs=1.75，这里是gm pinch off的地方，我们从0-28V扫描Vds：
 
 
 
