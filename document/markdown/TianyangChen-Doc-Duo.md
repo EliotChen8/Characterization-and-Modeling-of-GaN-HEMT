@@ -64,7 +64,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 这一部分介绍本次的Modeling Package，以及软件自身包含的整个提取项目的workflow。
 
 本次项目的测量和基础数据采集使用IC-CAP自带的Angelov GaN model，
-路径为`examples\model_files\hemt\angelovgan`，
+路径为`ICCAP/examples/model_files/hemt/angelovgan`，
 
 模型设计的工作流程如下：
 
@@ -76,7 +76,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 <div STYLE="page-break-after: always;"></div>
 
-## ==Characterization==
+## Characterization
 
 这一部分将讲述如何进行基于测量的Characterization，我将会详细介绍如何针对我们的器件来进行设置，介绍如何根据器件的基本信息设置具体的测试流程，并在尽可能确保器件安全的前提下完成测量。
 
@@ -121,7 +121,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 
 
-### ==Measurement Flow Design==
+### Measurement Flow Design
 
 #### Pilot Experiments
 
@@ -191,7 +191,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 1. 确保温度matrix和上一步中相同
 2. 确保频率matrix和上一步中相同
 
-#### ==DC Setups==
+#### DC Setups
 
 这一部分介绍DC测量的一系列setups，并基于本次的测量说明测量设计的思路。
 
@@ -271,11 +271,97 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 2. 根据教授经验，所有的测量需要依次进行。但对于有较大破坏性可能的实验，可以最后再测；
 3. 选择好的时机截取数据；
 
-#### ==RF Setups==
+#### RF Setups
 
 这一部分介绍DC测量的一系列setups，并基于本次的测量说明测量设计的思路。
 
 > 根据参数提取过程中得到的结果，这一部分的测量设计可能存在问题，请谨慎看待。
+
+- Cold FET：
+
+  1. spar_0V：当Vgs，Vds都是0的时候测量S参数
+
+     <img src="assets/image-20240831132651902.png" alt="image-20240831132651902" style="zoom:50%;" />
+
+- spar_vg_at_vd0：维持Vds=0并调整Vg
+
+  2. A1：pinch offf 区域的特性
+
+     ![image-20240831132919224](assets/image-20240831132919224.png)
+
+     <img src="assets/image-20240831132945391.png" alt="image-20240831132945391" style="zoom:50%;" />
+
+  3. A2：关闭区域的特性
+
+     ![image-20240831133222347](assets/image-20240831133222347.png)
+
+     <img src="assets/image-20240831133232115.png" alt="image-20240831133232115" style="zoom:50%;" />
+
+  4. A3：开启区域的特性
+
+     ![image-20240831133422972](assets/image-20240831133422972.png)
+
+     <img src="assets/image-20240831133449839.png" alt="image-20240831133449839" style="zoom:50%;" />
+
+- spar_vd_at_vg：设定Vg在特定值，扫描Vd全域
+
+  5. 0：设置Vg=0
+
+     <img src="assets/image-20240831133631809.png" alt="image-20240831133631809" style="zoom:50%;" />
+
+  接下来三项测量需要取决于Vg开始的特性：
+
+  <img src="assets/image-20240831134325206.png" alt="image-20240831134325206" style="zoom:20%;" />
+
+  我们观察到Linear的电流从vg=-1.75处开启，关闭与明显提升的点分别在-2和-1.5.
+
+  5. gm1：
+
+     <img src="assets/image-20240831134640409.png" alt="image-20240831134640409" style="zoom:50%;" />
+
+  6. gm2：
+
+     <img src="assets/image-20240831134653459.png" alt="image-20240831134653459" style="zoom:50%;" />
+
+  7. gm3：
+
+     <img src="assets/image-20240831134707218.png" alt="image-20240831134707218" style="zoom:50%;" />
+
+- spar_vg_vd：固定频率在提取电容的点，Vd维持在高点，根据A1-A3的设置调节Vg
+
+  9. vd1：
+
+     ![image-20240831135028982](assets/image-20240831135028982.png)
+
+     <img src="assets/image-20240831134953813.png" alt="image-20240831134953813" style="zoom:50%;" />
+
+  10. vd2：
+
+      ![image-20240831135040271](assets/image-20240831135040271.png)
+
+      <img src="assets/image-20240831135105742.png" alt="image-20240831135105742" style="zoom:50%;" />
+
+  11. vd3：
+
+      ![image-20240831135217800](assets/image-20240831135217800.png)
+
+      <img src="assets/image-20240831135228288.png" alt="image-20240831135228288" style="zoom:50%;" />
+
+- spar_vg_vd：
+
+  12. FC1：在FC1测量关于全域Vd和全域Vg的S参数
+
+      <img src="assets/image-20240831135348696.png" alt="image-20240831135348696" style="zoom:50%;" />
+
+  13. FC2：在FC2测量关于全域Vd和全域Vg的S参数
+
+      <img src="assets/image-20240831135358197.png" alt="image-20240831135358197" style="zoom:50%;" />
+
+- spar_i
+
+  14. spar_i：Drawing 1/2 of the current flowing from gate side into the drain side and measuring S
+
+      <img src="assets/image-20240831135434978.png" alt="image-20240831135434978" style="zoom:50%;" />
 
 
 
