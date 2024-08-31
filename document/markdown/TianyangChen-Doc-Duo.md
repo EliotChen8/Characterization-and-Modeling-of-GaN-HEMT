@@ -781,7 +781,7 @@ DC的仿真结果如下：
 > 看到结果的时候心都要碎了，
 > 因为教授会说我的结果看起来很funny。
 
-#### ==Optimization of Significant Parameters in ADS==
+#### Optimization of Significant Parameters in ADS
 
 这一部分将结合上述核心参数列表，主要从仿真结果的角度出发，说明各个参数对于仿真结果的影响
 
@@ -789,17 +789,73 @@ DC的仿真结果如下：
 
 但是，由于这一部分的内容并不基于文献与测量结果，请辩证性看待这一系列结论，并在调整项目的过程中保持谨慎。
 
-#### ==Fitting Results (Updated at Aug 29 2024)==
+DC Characters and Polynomial Coefficients:
+
+| Parameter | Effect on DC                                                 | Effect on S-Parameters                                       |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Ipk0      | Magnitude of drain current (Id)                              | Influential, but tuning is not recommended                   |
+| Vpks      | Position of the turn-on voltage in the Id-Vg                 | Influential, but tuning is not recommended                   |
+| Dvpks     | Slope in the turn-on region; gate diode conduction position  | Discreteness at low-frequency start in pinch-off simulation, smaller values lead to greater discreteness |
+| P1        | Density of the Id-Vd curves as gate voltage is swept, negative values indicate inverse relationship between Vg and turn-on current | Influential, but tuning is not recommended                   |
+| P2        | Voltage at the peak gm in Id-Vd curves                       | Discreteness at low-frequency start in pinch-off simulation, larger values lead to greater discreteness |
+| P3        | Density of the Id-Vd curves                                  | Discreteness at low-frequency start in pinch-off simulation, smaller values lead to greater discreteness |
+| Alphar    | Slope and curve disparity in the turn-on region              | Influential, but tuning is not recommended                   |
+| Alphas    | Sharpness of the transition from turn-on to saturation regions | Influential, but tuning is not recommended                   |
+| Lambda    | Slope in the saturation region                               | Influential, but tuning is not recommended                   |
+| Lambda1   | Slope in the saturation region                               | Influential, but tuning is not recommended                   |
+| Ij        | Current spread at high voltage in the off region, very minimal | None                                                         |
+
+Capacitance Parameters and Polynomial Coefficients:
+
+| Parameter | Effect on DC | Effect on S-Parameters                                       |
+| --------- | ------------ | ------------------------------------------------------------ |
+| Cds       | None         | Phase difference in S22 increases with value; S21 phase difference also increases |
+| Cgspi     | None         | Outer magnitude of S21 decreases with value                  |
+| Cgs0      | None         | Inner magnitudes of S21 and S12 decrease with value; outer magnitude of S12 increases |
+| Cgdpi     | None         | Curvature of S21 increases with value                        |
+| Cgd0      | None         | Sequence of curve                                            |
+| Cgdpe     | None         | Dispersion of S21 and S12                                    |
+| P10       | None         | Dependent variable, tuning not recommended                   |
+| P11       | None         | Dependent variable, tuning not recommended                   |
+| P20       | None         | Dependent variable, tuning not recommended                   |
+| P21       | None         | Dependent variable, tuning not recommended                   |
+| P30       | None         | Dependent variable, tuning not recommended                   |
+| P31       | None         | Dependent variable, tuning not recommended                   |
+| P40       | None         | Dependent variable, tuning not recommended                   |
+| P41       | None         | Dependent variable, tuning not recommended                   |
+
+Resistance and Inductance Parameters:
+
+| Parameter | Effect on DC                                                 | Effect on S-parameters                                       |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Rg        | None                                                         | S11 amplitude decreases with increasing value; dispersion and phase difference in S21 and S12 also decrease |
+| Rd        | Amplitude of id-vg curves                                    | Amplitude of S22 and S12 decreases with increasing value     |
+| Rs        | Amplitude of idvd; forward conduction region amplitude in idvg | S11 and S22 amplitude decreases with value; dispersion and phase difference in S21 and S12 also decrease |
+| Ri        | None                                                         | S11 amplitude decreases with increasing value; phase difference and dispersion in S21 and S12 also decrease |
+| Rgd       | None                                                         | S22 amplitude decreases with value; phase difference in S21 and S12 increases |
+| Lg        | None                                                         | Phase difference in S11 increases with value; similar increase in phase difference for S21 and S12 |
+| Ld        | None                                                         | Phase difference in S22 decreases with value; amplitude and phase difference in S21 increase; phase difference in S12 also increases |
+| Ls        | None                                                         | Phase difference in S11 and S22 increases with value; S21 and S12 show inner curling at higher frequencies |
+
+#### Fitting Results (Updated at Aug 29 2024)
 
 这一部分将介绍目前最新得到的仿真结果，并对目前存在的困难进行分析。
 
 DC的仿真结果如下：
 
+<img src="assets/image-20240831011019707.png" alt="image-20240831011019707" style="zoom:33%;" />
+
 对于S参数，我们仿真三个场景。第一个是cold FET：
+
+<img src="assets/image-20240830234212067.png" alt="image-20240830234212067" style="zoom:33%;" />
 
 第二个是在没有施加Vds的前提下，扫描Vgs：
 
-第三个是在Vgs=1.75，这里是gm pinch off的地方，我们从0-28V扫描Vds：
+<img src="assets/image-20240830233504228.png" alt="image-20240830233504228" style="zoom:33%;" />
+
+第三个是在Vgs=1.75，这里是gm pinch off的地方，我们从0-28V扫描Vds:
+
+<img src="assets/image-20240831010035759.png" alt="image-20240831010035759" style="zoom:33%;" />
 
 
 
