@@ -138,7 +138,7 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 总而言之，预实验只是我们初步了解器件特性的一个信息来源，我们可以依据预实验来初步设计测量setup，但也不应该过度相信初步结果。
 
-#### ==Measurement Setting==
+#### Measurement Setting
 
 这一部分将介绍如何对测试的基本信息进行设置，包含了对校准的设置、对测量限制的设置、和对于提取频率的设置。
 
@@ -180,13 +180,96 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
    - 这一步的频率选择与基于cold FET寻找测量结果flat range的思路不同，请勿混淆；
    - 由于掌握的信息有限，我们可能不能在第一次直接测量到对的值，我们需要在多次实验中寻找反馈。
 
-#### ==Pad Open/Short==
+#### Pad Open/Short
 
 这一部分介绍了对于Open和Short Pad的测量，这一步将被应用于De-embed计算。
+
+<img src="assets/image-20240831121808164.png" alt="image-20240831121808164" style="zoom:33%;" />
+
+在设计阶段，我们并不需要担心太多，只需要注意以下两点：
+
+1. 确保温度matrix和上一步中相同
+2. 确保频率matrix和上一步中相同
 
 #### ==DC Setups==
 
 这一部分介绍DC测量的一系列setups，并基于本次的测量说明测量设计的思路。
+
+在DC的测量中，主要包含了4组、11个Setups：
+
+- Port R Bias: 分别在两个端口上加电流，测量电压，计算端口电阻。
+
+  1. Bias_R1_wRT: 测量Short ISS条件下的Port 1；
+
+     <img src="assets/image-20240831123755551.png" alt="image-20240831123755551" style="zoom:50%;" />
+
+  2. Bias_R2_wRT: 测量Short ISS条件下的Port 2；
+
+     <img src="assets/image-20240831123818319.png" alt="image-20240831123818319" style="zoom:50%;" />
+
+- Gate Diode: 测量Gate Diode的物理属性，这一步可以通过在预实验中观察开启电压来预测，在实际测试中，我们可以再根据测量结果进行灵活调整。
+
+  3. ig_vg_f: gate二极管正向特征，主要关注开启到饱和的区域，测量Vg增大过程中Ig逐渐导通的过程。具体而言，我们需要Sweeps until the resistance component is seen in bias，也就是观察Log Ig关于Vg的曲线在高电压处变得平缓。
+
+     <img src="assets/image-20240831124741296.png" alt="image-20240831124741296" style="zoom:80%;" />
+
+     为了防止烧毁器件，我们在设计setup的过程中应该遵循如下思路：
+
+     <img src="assets/image-20240831124942422.png" alt="image-20240831124942422" style="zoom:50%;" />
+
+     - 确保Vd接近于0；
+     - 维持相对保守的Vg策略，并做好根据测量进行调节的准备；
+     - 先沿用通用的compliance，准备根据测量结果放宽compliance。
+
+  4. ig_vg_r: 测量二极管的反向特性：
+
+     <img src="assets/image-20240831125328896.png" alt="image-20240831125328896" style="zoom:50%;" />
+
+     这一步相对简单，只需要观察漏电，不要施加过大的负向电压导致击穿即可。
+
+- IV-Curve: 最基本且重要的测量；
+
+  5. id_vgs：需要测量出gm不断增大的过程，一直sweep，直到gm随着bias开始下降的时候：
+
+     <img src="assets/image-20240831125725593.png" alt="image-20240831125725593" style="zoom:50%;" />
+
+  6. id_vds：最经典的IV-curve，但是需要扫描到自热，也就是高vds处的曲线开始向下倾斜：
+
+     <img src="assets/image-20240831130116960.png" alt="image-20240831130116960" style="zoom:50%;" />
+
+- Targeted: 针对器件预期的工作区域进行有目的的单独测量；
+
+  7. id_vgs_vg_neg：测Id和gate反向电流的关系
+
+     <img src="assets/image-20240831130403022.png" alt="image-20240831130403022" style="zoom:50%;" />
+
+  8. id_vgs_tgt：要测在target直流偏置下的id和vgs
+
+     对于本次测量，目标就是vd在5-25V之间器件相对稳定的工作区域
+
+     <img src="assets/image-20240831130537445.png" alt="image-20240831130537445" style="zoom:50%;" />
+
+  9. id_vds_low:测在Vd很小时候的特性，要尽可能测反向偏置，但是小心损坏器件
+
+     ![image-20240831130737094](assets/image-20240831130737094.png)
+
+     <img src="assets/image-20240831130718147.png" alt="image-20240831130718147" style="zoom:50%;" />
+
+  10. id_vds_high: 测id大电流，将Vg控制在目标工作区，然后尽可能加大Vds，小心击穿器件
+
+      ![image-20240831130849211](assets/image-20240831130849211.png)
+
+      <img src="assets/image-20240831130902930.png" alt="image-20240831130902930" style="zoom:50%;" />
+
+  11. is_vds_tgt:测目标偏置下的特性，如不确定目标，可以沿用之前不考虑目标时候的设置
+
+      <img src="assets/image-20240831131034504.png" alt="image-20240831131034504" style="zoom:50%;" />
+
+在DC的测量中，还有可要注意一些细节：
+
+1. 当DC测出来噪声很大，关闭MWA再试试；
+2. 根据教授经验，所有的测量需要依次进行。但对于有较大破坏性可能的实验，可以最后再测；
+3. 选择好的时机截取数据；
 
 #### ==RF Setups==
 
