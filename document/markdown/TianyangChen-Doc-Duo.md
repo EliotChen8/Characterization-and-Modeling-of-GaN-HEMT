@@ -45,7 +45,7 @@
 
 ### ==Angelov Model==
 
-#### ==A Review==
+#### ==A Brief Review==
 
 这一部分将介绍本次文献调研的基本情况，着重介绍提出Angelov模型的论文，并介绍这一模型的逐渐发展—最终成为商业simulator的常用模型的过程。
 
@@ -55,13 +55,20 @@
 
 
 
-### ==Integrated Circuit Characterization and Analysis Program (IC-CAP)==
+### Integrated Circuit Characterization and Analysis Program (IC-CAP)
 
 IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的建模和特性分析。
 
-#### ==Designed Workflow==
+#### Designed Workflow
 
 这一部分介绍本次的Modeling Package，以及软件自身包含的整个提取项目的workflow。
+
+本次项目的测量和基础数据采集使用IC-CAP自带的Angelov GaN model，
+路径为`examples\model_files\hemt\angelovgan`，
+
+模型设计的工作流程如下：
+
+<img src="assets/image-20240831020312221.png" alt="image-20240831020312221" style="zoom:80%;" />
 
 
 
@@ -73,23 +80,105 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 这一部分将讲述如何进行基于测量的Characterization，我将会详细介绍如何针对我们的器件来进行设置，介绍如何根据器件的基本信息设置具体的测试流程，并在尽可能确保器件安全的前提下完成测量。
 
-### ==Settings==
+这一部分的帮助文档介绍比较详细，我们可以阅读帮助文档来指导我们的实验。这一部分我将会主要介绍帮助文档没有具体讲解，或者与DUT自身属性相关性较强的内容。
 
-#### ==Device Settings==
+### Settings
+
+#### Device Settings
 
 这一部分将介绍如何基于器件的基本结构对于项目进行设置。
 
-#### ==Instrument Setting==
+这一部分比较主要的内容是对于Gate Width和Gate Finger的个数进行录入，这取决于器件本身。这一过程并不会直接影响测量与参数提取，但是有利于让建立的模型对设计有更强的指导性意义。
+
+对于本次实验，我们测量的是 UltrabandTech 的 GaN HEMT，其Walfer No. 为 1R
+
+<img src="assets/image-20240831103527462.png" alt="image-20240831103527462" style="zoom:33%;" />
+
+我们可以将器件参数录入到IC-CAP当中：
+
+![image-20240831103605453](assets/image-20240831103605453.png)
+
+#### Instrument Setting
 
 这一部分将介绍本次实验选用的测量仪器，并介绍如何通过IC-CAP与仪器进行通信。
+
+进入IC-CAP的Measure步骤，这可能看起来会有一些混乱：
+
+<img src="assets/image-20240831104557732.png" alt="image-20240831104557732" style="zoom:33%;" />
+
+但是在正式测量开始前，我们只需要确定我们需要使用哪些仪器，仪器的量程能够覆盖器件测试的需求，并确保我们计划使用的仪器能够与我们的电脑正常通信。
+
+本次实验：
+
+<img src="assets/image-20240831110013263.png" alt="image-20240831110013263" style="zoom:33%;" />
+
+- 基于Linux的IC-CAP 2021程序；
+
+- 使用HP4142作为DC的测量平台，其支持40uV-100V的电压偏置和20fA-100mA的电流供应，可以作为Force，也可以作为Sense，满足器件需求；
+- 使用KeysightPNA作为RF的测量平台，支持最高110GHz的网络分析，本次的HEMT工作在28GHz，满足器件需求。
+
+在确定使用的仪器后，我们可以尝试用电脑与仪器之间进行通信。通常情况下，Linux终端可以直接连接。但是Windows终端可能有所不同。此时我们可以下载Keysight Connection Expert，完成默认配置后我们便可以实现IC-CAP和测量仪器的通信。
 
 
 
 ### ==Measurement Flow Design==
 
+#### Pilot Experiments
+
+虽然我们的目标是测试测量器件的属性，但是在设计测量流程开始之前，我们不能对其一无所知。
+
+对于本次实验，在测量开始之前，我们在预实验中得到了器件的IV-Curve：
+
+<img src="assets/image-20240831111433955.png" alt="image-20240831111433955" style="zoom:33%;" />
+
+不过这里有非常有趣的一个发现：预实验的结果可能会和最终实验的结果相差很大。例如在这个预实验中，我们可以观察到很明显的kink effect，但在最终本次测量得到的结果中这个effect并不明显。我们猜测这可能是以下几个原因导致的：
+
+- 两次测试使用了不同的仪器；
+- 在正式实验中，我们施加了负向Vd，这可能在一定程度上缓和了kink effect。
+
+总而言之，预实验只是我们初步了解器件特性的一个信息来源，我们可以依据预实验来初步设计测量setup，但也不应该过度相信初步结果。
+
 #### ==Measurement Setting==
 
 这一部分将介绍如何对测试的基本信息进行设置，包含了对校准的设置、对测量限制的设置、和对于提取频率的设置。
+
+<img src="assets/image-20240831114943332.png" alt="image-20240831114943332" style="zoom:33%;" />
+
+在这一步中，我们需要完成五步设置：
+
+1. 温度：
+
+   尽管我们本次只测量器件在室温下的特性，但是软件会默认拥有一个温度列表。我们需要做的是将温度列表中的项目尽可能减少，只需要保留Tnom（25℃）和另一个即可。在之后参数提取的过程中，我会讲解如何让软件在只测量室温的情况下运行。
+
+2. Compliance pre-setting：
+
+   这一步非常重要，是保护我们器件安全的第一道防线。
+
+   我们可以根据预实验中测得的电流和电压来设置这一系列参数。值得注意的有几点：
+
+   - 当我们的setup是测量电压时，电流compliance生效，反之亦然；
+   - 这里设置的是绝对值，例如当我们想扫描-3~0V时，我们需要设置电压的compliance为3；
+   - 在设置好compliance后，我们可以直接在后续的步骤中选择维持这一compliance来同步数据，我们也可以通过输入新的数据来override默认值，但请注意，这一步包含一定风险。
+
+   对于source和substrate的compliance，针对GaN HEMT的测量场景，我们直接维持drain的设置即可。
+
+3. 扫频：
+
+   这一步可以适当扩大扫频的范围，这可以说明我们的模型可以在更宽的频率范围内工作。
+
+4. 单点频率：
+
+   这一步很重要，这决定了之后测量器件极间寄生电容和电阻的频率选定，将会在很大程度上影响S参数的测量数据提取和fitting。
+
+   我们可以参考以下叙述进行设计：
+
+   ![image-20240831120720728](assets/image-20240831120720728.png)
+
+   值得注意的包括以下两点：
+
+   - 这一步的频率必须选择扫频matrix中已经存在的频率
+   - 这一步的频率选择与基于cold FET寻找测量结果flat range的思路不同，请勿混淆；
+   - 由于掌握的信息有限，我们可能不能在第一次直接测量到对的值，我们需要在多次实验中寻找反馈。
 
 #### ==Pad Open/Short==
 
@@ -103,6 +192,8 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 这一部分介绍DC测量的一系列setups，并基于本次的测量说明测量设计的思路。
 
+> 根据参数提取过程中得到的结果，这一部分的测量设计可能存在问题，请谨慎看待。
+
 
 
 ### ==Measurements with Risk Managements==
@@ -113,9 +204,32 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 
 在测试器件的过程中，我们难免会施加一些相对严格的条件，这是一个高风险高回报的过程。当然，我们可以进行风险和收益的trade off，从而在更安全的范围内得到更有效的数据。
 
-#### ==Instrument Setups==
+#### Instrument Setups
 
 这一部分将介绍仪器和测试端口的连接。
+
+在测量开始前，我们需要确保仪器已经正确的与电脑进行通信：
+
+<img src="assets/image-20240831112936151.png" alt="image-20240831112936151" style="zoom:33%;" />
+
+1. 检查电脑与repeater的物理连接，本次实验使用GPIB进行连接；
+2. 检查电脑能够正确扫描到相对应的设备；
+
+连接正常后，我们需要进行名称和端口的配置：
+
+1. 对于DC：
+   1. 测量仪器端口的硬件名称可能和实际名称不一样，我们只需要将硬件名称对应的代称改为SMU1和SMU2即可；
+   2. 将被设置为SMU1的端口使用线缆连接至Port1，SMU2同理。
+2. 对于RF：
+   1. 将网络分析仪命名为NWA；
+   2. 虽然帮助文档上要求我们在此时完成Set NWA，但事实上这一步的功能是将IC-CAP中的设置同步到NWA之上，不用为此感到疑惑。
+
+最终，我们需要连接仪器与探针平台，在这一步我们需要注意：
+
+1. 请确保将SMU1-Port1连接到Gate；
+2. 请确保将SMU2-Port2连接到Drain；
+3. 请不要给Source连接SMU，这可能会导致测试结果异常；
+4. 对于GaN HEMT，Substrate是绝缘的，直接接地即可。
 
 #### ==Measurement Settings==
 
@@ -132,6 +246,8 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 #### ==Measure RF==
 
 这一步将介绍如何运行RF测量的setup，并根据结果调整测量参数。
+
+>  根据参数提取过程中得到的结果，这一部分的测量可能存在问题，请谨慎看待。
 
 
 
