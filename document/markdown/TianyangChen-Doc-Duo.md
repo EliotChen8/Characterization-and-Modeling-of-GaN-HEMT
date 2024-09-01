@@ -24,34 +24,121 @@
 
 
 
-### ==Gallium Nitride (GaN) High-Electron-Mobility Transistors (HEMTs)==
+### Gallium Nitride (GaN) High-Electron-Mobility Transistors (HEMTs)
 
-#### ==Concepts==
+#### Concepts
 
-这一部分将结合文献调研介绍氮化镓高电子迁移率三极管的基本概念和结构
+HEMT是一种采用异质结构设计的场效应晶体管，利用两种不同半导体材料的界面的势阱中产生的二维电子气（2DEG）通道，实现高速电子传输和低电阻特性。
 
-#### ==Modeling Techniques==
+<img src="assets/image-20240831215038265.png" alt="image-20240831215038265" style="zoom:33%;" />
 
-这一部分将主要介绍目前市面上常见的三种针对GaN HEMT的建模方式，并且分析其优缺点。
+GaN HEMT是一种基于氮化镓材料的HEMT，其优势包括更高的击穿电压、更大的功率密度和更优的高温性能，适合应用于高频和高功率电子设备。
+
+#### Modeling Techniques
+
+这一部分将主要介绍目前常见的三类针对GaN HEMT的建模方式，并且分析其优缺点。
 这一部分说明了为什么我们需要在本次项目中采用Angelov GaN模型。
 
-- **Physics Based Models:**
+由于GaN HEMT具有卓越的性能优势，对其进行有效的建模显得尤为重要——建模不仅是连接器件特性与其在实际应用中性能的桥梁，而且也是电路设计和系统集成的基础。在GaN HEMT的模型发展历史中，主要演化出了以下几类。
 
-- **ANN Based Models:**
+- **Physics Based Models:** 经验模型侧重于通过选择和组合数学函数，来数值上拟合模型行为与测量数据的匹配，这些函数通常没有物理解释。经验模型的优势在于计算效率高，易于在电路仿真器中实现；劣势是缺乏对器件物理行为的解释，且参数提取耗时且需经验丰富的建模者。经验模型适用于快速评估并仿真新设备的性能，特别是在电路和系统层面，但不适合从设备角度优化电路性能。
 
-- **Empirical Models:**
+- **ANN Based Models:** 神经网络模型，比如DynaFET，采用神经网络方法，通过使用经验模型进行过渡并进行建模，以适应各种偏压、负载和频率条件下的仿真需求。神经网络模型的优势在于在大信号波形测量和模型训练方面取得了良好的效果；劣势是但耗时且对算力消耗大，缺乏物理解释，可以说继承了经验模型的所有限制。神经网络模型适用于需要广泛偏压和负载条件下的DC、S参数、谐波及互调失真和负载拉动仿真的场景。
+
+- **Empirical Models:** 基于物理的模型根据半导体物理（如材料特性和载流子运动）来分析器件行为的原因，使用的参数较少且具有明确的物理意义。其优势是提供了从量子物理到器件物理级别的明确解释，有助于器件与电路的交互式设计；劣势是需要特殊的数值算法来解决开放形式的模型方程，计算密集。适合那些需要从基础物理原理出发进行电路设计和优化的应用，但需要详细的器件过程信息。
+
+在领域内常用的模型如下所示：
+
+![image-20240831194809149](assets/image-20240831194809149.png)
+
+在本次暑期科研项目中，我们选择采用Angelov GaN模型，主要是因为这种模型能够在不完全掌握设备详细物理信息和结构的情况下，依旧能够提供对GaN HEMT的有效建模。考虑到项目周期短且无法获得厂家的详细器件信息，经验模型，特别是Angelov GaN模型以其较高的characteristic和modeling效率，成为了一个合适的选择。
 
 
 
-### ==Angelov Model==
+### Angelov Model
 
-#### ==A Brief Review==
+#### A Brief Review
 
-这一部分将介绍本次文献调研的基本情况，着重介绍提出Angelov模型的论文，并介绍这一模型的逐渐发展—最终成为商业simulator的常用模型的过程。
+这一部分将介绍本次文献调研的基本情况，着重介绍提出Angelov模型的论文。
 
-#### ==Angelov GaN Model==
+Angelov 模型是 Iltcho Angelov 教授于 1992 年首次针对 GaAs MESFET 和 HEMT 提出的经验模型，后来扩展到 GaN HEMT 作为 Angelov-GaN 模型。
 
-这一部分将介绍本次模型中所采用的Angelov GaN模型。本次项目基于keysight发行的GaN HEMT model进行仿真。
+Angelov模型的核心方程包括描述漏极电流、栅极电流和非线性电容 (Cgs、Cgd、Cds) 的方程。对漏极电流、栅极电流和非线性电容的观察表明，它们相对于栅极电压通常呈现双曲正切形状，而跨导呈现钟形形状，因此选择tanh(x)函数作为核心经验拟合函数。
+
+漏极电流通过 VGS 相关项和 VDS 相关项的乘积进行建模，如下所示
+$$
+I_d = I_{pk0} \left( 1 + \tanh \phi \right) \tanh \left( \alpha V_{ds} \right) \left( 1 + \lambda V_{ds} \right)
+\\
+\alpha = \alpha_r + (1 + \tanh \phi) \alpha_s
+\\
+$$
+Ipk是对应于最大跨导 gmpk 的偏置下的漏极电流。 λ 是模拟漏极诱导势垒降低的系数。 ψ 被建模为峰值 gm 点处的幂级数，如下所示：
+$$
+\phi = P_1m (V_{gs} - V_{pks}) + P_2 (V_{gs} - V_{pks})^2 + P_3 (V_{gs} - V_{pks})^3
+$$
+Vpk 是最大 gmpk 的栅极电压。这里添加了更多经验拟合参数（P1、P2、P3 ...）来拟合栅源电压依赖性。其中P1的提取近似地可以用器件的特性来直接计算：
+$$
+P_1 = \frac{g_{mpk}}{I_{pk} (1 + \lambda V_d)} \approx \frac{g_{mpk}}{I_{pk}}
+$$
+基于本模型，高频属性通过以下方程将非线性电容与测量电容进行经验拟合来建模
+$$
+C_{gs} = C_{gspi} + C_{gs0} (1 + \tanh \phi_1)(1 + \tanh \phi_2)
+\\
+C_{gd} = C_{gdpi} + C_{gd0} (1 + \tanh \phi_3)(1 + \tanh \phi_4)
+$$
+这里引入更多拟合参数来拟合电容模型：
+$$
+\phi_1 = P_{10} + P_{11} V_{gs}
+\\
+\phi_2 = P_{20} + P_{21} V_{ds}
+\\
+\phi_3 = P_{30} + P_{31} V_{gs}
+\\
+\phi_4 = P_{40} + P_{41} V_{ds}
+$$
+Angelov-GaN 模型基于大量的拟合参数，该模型能够捕捉一部分的器件特性。然而，大量参数测量和提取过程相当具有挑战性。 I-V 方程中拟合参数（例如上面显示的 P 和 Φ 的集合）的独立性可能会导致模型的拟合在一定程度上脱离实际意义。
+
+与此同时，Angelov模型不基于物理。尽管模型构建无法为设备工程师或电路设计人员提供物理见解，且对设备进行的任何工艺或几何形状更改都需要重新拟合模型。但对于本次暑期科研，我们没有从厂商得到该器件的物理属性信息。
+
+总体来说，Angelov 模型是实用、简单、准确的大信号经验模型，能够对漏极电流-栅极电压特性及其导数以及电容进行有效拟合。因此，Angelov模型已被广泛应用于 HEMT 和 MESFET的建模。被用于预测器件的直流参数和 S 参数，并以良好的精度模拟不同非线性电路（如混频器和乘法器）的性能，有利于将器件运用于实际的电路设计当中。
+
+综上所述，使用Angelov模型进行拟合对于本次暑期科研来说是具有合理性的。
+
+#### Developments
+
+这一部分将介绍这一模型的逐渐发展—最终成为商业simulator的常用模型的过程。
+
+在文献综述中，Angelov模型主要经历了以下的发展：
+
+1. **1992**："A New Empirical Nonlinear Model for HEMT and MESFET Devices"文中，Iltcho Angelov等人首次提出了Angelov模型。文章提出了一种新的大信号模型，能够模拟HEMT和MESFET的I-V特性及其导数，包括特征跨导峰值和电容。这一模型的参数提取直接且有效，已成功应用于各种亚微米栅长的HEMT设备，包括不同掺杂的伪异质结HEMT、晶格匹配的InP HEMT以及商用的MESFET。该模型研究了下图中的PM2 HEMT，为其构建了等效电路模型，并进行了测量和仿真；
+
+   <img src="assets/image-20240831202612230.png" alt="image-20240831202612230" style="zoom: 55%;" />
+
+2. **1996**："Extensions of the Chalmers Nonlinear HEMT and MESFET Model"文中，Angelov等人扩展了Chalmers非线性模型，增加了模拟温度、色散和软击穿效应的能力。这一扩展允许模型更准确地预测不同制造商的商业HEMT和MESFET设备在17-400 K温度范围内的行为。文章基于模型对HEMT优化了等效电路模型，并进行了参数提取和仿真分析；
+
+   ![image-20240831203325186](assets/image-20240831203325186.png)
+
+3. **2005**："On the large-signal modelling of AlGaN/GaN HEMTs and SiC MESFETs"文中，Angelov等人发展了一个适用于GaN和SiC FET设备的通用大信号模型。该模型提高了谐波管理能力，提供了对色散的更物理化处理，同时模拟了这些设备中的其他特定效应。这一模型在仿真工具中得到了实现，并在DC、S和大信号测量中展示了良好的准确性和稳定性；
+
+   <img src="assets/image-20240831203817223.png" alt="image-20240831203817223" style="zoom: 67%;" />
+
+4. **2007**："Large-Signal Modelling and Comparison of AlGaN/GaN HEMTs and SiC MESFETs"文中，Angelov等人进一步改进了针对GaN和SiC FET设备的大信号模型，特别注重提高谐波分析和提供对色散的物理化处理。这一改进使模型在商业仿真工具中的表现更加准确；
+
+5. **2010**："On the Large Signal Evaluation and Modeling of GaN FET"文中，Angelov等人扩展了GaN FET的大信号模型，包括偏置和温度依赖的接入电阻，修改了电容和电荷方程，以及新增了击穿模型。这些改进进一步提高了模型在仿真工具中的整体准确性。
+
+   <img src="assets/image-20240831204127800.png" alt="image-20240831204127800" style="zoom:33%;" />
+
+6. **近几年**：一系列论文中继续优化Angelov-GaN模型，尤其是对于小栅长和栅宽的GaN HEMT。这些研究通过参数分析扩展了标准DC模型，为RF建模使用开短路de-embed来捕捉pad寄生效应，使模型在DC I-V Curve和S参数上与实验数据更加吻合。
+
+   <img src="assets/image-20240831204618778.png" alt="image-20240831204618778" style="zoom: 44%;" />
+
+
+
+#### Angelov GaN Model
+
+本次项目基于Keysight发行的GaN HEMT model开展研究：
+
+<img src="assets/image-20240831210302457.png" alt="image-20240831210302457" style="zoom:80%;" />
 
 
 
@@ -69,8 +156,6 @@ IC-CAP一个由Keysight Technologies开发的软件，用于半导体器件的�
 模型设计的工作流程如下：
 
 <img src="assets/image-20240831020312221.png" alt="image-20240831020312221" style="zoom:80%;" />
-
-
 
 [Back to Table of Contents](# Characterization and Modeling of GaN HEMTs)
 
@@ -1210,7 +1295,7 @@ DC的仿真结果如下：
 
 <div STYLE="page-break-after: always;"></div>
 
-## ==Appendix==
+## Appendix
 
 ### Keysight: Angelov-GaN Parameters Definitions and Default Values
 
@@ -1274,14 +1359,10 @@ DC的仿真结果如下：
 
 7. Finalize: Saving all parameters in the model files
 
-
-
 [Back to Table of Contents](# Characterization and Modeling of GaN HEMTs)
 
 <div STYLE="page-break-after: always;"></div>
 
 ## ==Reference==
-
-
 
 [Back to Table of Contents](#Characterization and Modeling of GaN HEMT)
