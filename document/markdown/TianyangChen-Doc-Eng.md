@@ -550,7 +550,7 @@ In this instance, no calibration pads were fabricated on the wafer. Consequently
 
 <img src="assets/image-20240831153311382.png" alt="Pad Image" style="zoom:27%;" />
 
-However, there are two potential risks associated with this approach that might introduce errors into the de-embedd results:
+==However, there are two potential risks associated with this approach that might introduce errors into the de-embedd results:==
 
 1. The wafer does not contain a 2x50 pad; the closest available was a 2x37.5, which we measured instead;
 2. The pad used for de-embedding was not from the same sample.
@@ -603,22 +603,21 @@ Given that the setup has already been thoroughly discussed, I will focus on the 
 
 #### All Parameters
 
-使用 Angelov GaN 进行建模，我们需要提取一系列参数。
-对于simulator来说，所有的参数已经定义好并完成了初始化。
+Modeling with Angelov GaN requires the extraction of a series of parameters. 
+For the simulator, all parameters have been defined and initialized. 
 
-对于本次项目中使用的模型，所有参数的名称，定义和默认值，请见[Appendix 4.1](### Keysight: Angelov-GaN Parameters Definitions and Default Values)
+For the model used in this project, all parameter names, definitions, and default values 
+are provided in [Appendix 4.1](### Keysight: Angelov-GaN Parameters Definitions and Default Values).
 
 #### List of Significant Parameters
 
-并非所有参数都将对最终的仿真结果产生实质性影响。同时，由于ICCAP和ADS使用的仿真器版本不一定一致，有相当一部分参数将在ADS的仿真器中出现，但是并不会被ICCAP所提取。不过幸运的是：经过测试，这一系列参数基本不会对最终的fitting结果产生实质性影响。
+Not all parameters significantly impact the final simulation results. Moreover, due to differences in the simulator versions used by ICCAP and ADS, a considerable number of parameters that appear in the ADS simulator will not be extracted by ICCAP. Fortunately, testing has shown that these parameters generally do not significantly affect the final fitting results. 
 
-对于将会对仿真结果产生实质性影响，且支持从ICCAP中进行提取的参数，我整理如下：
+Based on the type of parameters and their impact on the final results, I have divided the parameters into the following three groups; For each parameter, based on the experience gained in this project, there are mainly three sources of information: Calculations from ICCAP; Manual extraction procedures; Tuning based on fitting results.
 
-> 根据参数的类型和对最终结果的影响，我将参数分为以下三组；
->
-> 对于每个参数，基于本次项目中获得的经验，主要有三种获取信息的来源：来自ICCAP的计算，来自manual提取参数的程序，和根据fitting结果的tuning。在表格中，我分别用ICC, MAN, TUN代表信息的来源，其中1代表该参数信息可以在这一过程中获取。
+The parameters that significantly impact the simulation results and are supported for extraction from ICCAP are organized as follows. In the table, I use ICC, MAN, and TUN to represent the sources of information, where 1 indicates that information about this parameter can be obtained in that process.
 
-DC Characters and Polynomial Coefficients:
+**DC Characters and Polynomial Coefficients:**
 
 | Parameter | Definition and Description                                   | ICC  | MAN  | TUN  |
 | --------- | ------------------------------------------------------------ | ---- | ---- | ---- |
@@ -634,7 +633,7 @@ DC Characters and Polynomial Coefficients:
 | Lambda1   | Channel length modulation parameter                          | 0    | 0    | 1    |
 | Ij        | Gate forward saturation current                              | 0    | 0    | 1    |
 
-Capacitance Parameters and Polynomial Coefficients:
+**Capacitance Parameters and Polynomial Coefficients:**
 
 | Parameter | Definition and Description             | ICC  | MAN  | TUN  |
 | --------- | -------------------------------------- | ---- | ---- | ---- |
@@ -653,7 +652,7 @@ Capacitance Parameters and Polynomial Coefficients:
 | P40       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
 | P41       | Polynomial coefficient for capacitance | 0    | 1    | 1    |
 
-Resistance and Inductance Parameters:
+**Resistance and Inductance Parameters:**
 
 | Parameter | Definition and Description | ICC  | MAN  | TUN  |
 | --------- | -------------------------- | ---- | ---- | ---- |
@@ -672,11 +671,11 @@ Resistance and Inductance Parameters:
 
 #### Extraction Flow Overview
 
-这一部分将介绍IC-CAP软件原生设计的参数提取流程。
+This section presents the native parameter extraction process designed within the IC-CAP software.
 
-![image-20240830164602889](assets/image-20240830164602889.png)
+![IC-CAP Process Diagram](assets/image-20240830164602889.png)
 
-具体而言，整个流程主要分为7个大的部分，每个部分包含着软件中显示的extraction setup，在这些setup当中，我么可以的得到我们需要的参数，具体情况如下所示（对于提取出核心参数的步骤进行了加粗）：
+Specifically, the process is divided into seven major sections, each containing the extraction setup displayed in the software. Within these setups, we can obtain the necessary parameters as detailed below (steps involving the extraction of core parameters are **bolded**):
 
 1. **Initialize:**
    1. Reset Parameter to Defaults:
@@ -705,42 +704,47 @@ Resistance and Inductance Parameters:
 7. **Finalize:**
    1. Save Parameters:
 
-当然，这个流程不是完美的，尤其是在拟合过程中将会出现大量error。根据我的测试，软件中自带的extract flow甚至不能完整运行自带的demo程序，且debug过程相当复杂。
+Certainly, this process is not without its imperfections, particularly in the fitting process where numerous errors can arise. According to my tests, the software’s built-in extraction flow fails to fully execute even its own demo programs, and the debugging process is considerably complex.
 
-根据与教授的沟通，教授告诉我软件并不是万能的，我们应该以软件作为自己的启发，但回归论文寻找更清晰的答案。因此在本次工作中，我们的目的是：
+Based on discussions with my professor, it was emphasized that software is not a **panacea**; rather, it should serve as a catalyst for inspiration, while returning to the literature may provide clearer answers. 
 
-1. 能够完整的运行整个extract flow；
-2. 使用IC-CAP计算了一部分参数；
-3. 之后，我们会基于这些参数和论文中的定义来手动提取剩余的参数；
-4. 最终，根据ADS的tuning结果来得到所有参数。
+Consequently, the objectives for this work are:
+
+1. To successfully execute the entire extraction flow;
+2. To compute a subset of parameters using IC-CAP;
+3. To subsequently manually extract the remaining parameters based on these computed values and definitions found in the literature;
+4. Finally, to derive all parameters based on the tuning results in ADS.
 
 #### Debugging
 
-这一部分将介绍实际运行Extraction Flow之前的debug过程。
+This section will detail the debugging process prior to executing the Extraction Flow.
 
-如果使用软件自带的程序，由于其必须要提取一系列温度敏感性相关的参数，系统会强制要求测量两个温度下期间的character。具体而言，软件会禁止我们选择shrink list。
+Utilizing the software’s built-in procedures requires the extraction of a series of temperature-sensitive parameters, compelling the system to require measurements at two different temperatures. 
 
-<img src="assets/image-20240830165650120.png" alt="image-20240830165650120" style="zoom: 80%;" />
+Specifically, the software prohibits the selection of a shrink list:
 
-但是本次暑期科研的测试平台只支持测量室温一个温度下的数据，这和软件产生了冲突。
+<img src="assets/image-20240830165650120.png" alt="image-20240830165650120" style="zoom:67%;" />
 
-在参数提取过程中，这个问题会被体现出来。具体而言，软件在初始化过程中会中断，并禁止我们继续进行参数提取，这将使我们完全不能从IC-CAP当中提取所有参数。
+However, the testing platform available during this summer research only supports measurements at room temperature, which conflicts with the software requirements.
 
-为了解决这一问题，我们可以进行以下操作
+During the parameter extraction process, this issue manifests as the software interrupts the initialization process and prevents further extraction, thereby blocking all parameter retrieval from IC-CAP.
 
-- 选中室温（Tnom）下的测试数据，并导出；
-- 选中另外一个温度的对应setup，导入室温下的数据；
-- 请不要忘记：在这一步选择Copy Tnom Settings，否则程序将会依旧无法运行。
+To resolve this issue, the following steps can be undertaken:
 
-此时运行测试流程，程序将可以运行，运行中主要会出现三种报错：
+- Select the room temperature (Tnom) test data and export it;
+- Choose another temperature's corresponding setup and import the room temperature data;
+- Do not forget to select "Copy Tnom Settings"; otherwise, the program will still fail to execute.
 
-- 优化函数显示 Data Unchanged，这是相对正常的，说明拟合结果已经达到了最好；
-- 优化函数中断并显示仿真器出错，这是相对难以处理的问题。我们可以选择从上一步重新运行，大多数情况下这一种错误将会消失；
-- 在terminal的output显示较大误差，且数据不变，这种情况需要分类讨论：
-  - 如果是参数触及了仿真前设置的极限，可以尝试调整极限；
-  - 但是绝大多数情况下，函数就是不工作；
-    事实上，我曾经花了一个星期来研究这个问题，但是没有得到一个明确的答案；
-    也正是在此时教授提醒了我，让我不要盲目相信这个软件。
+Upon running the test flow with these settings, the program should execute.
+Typically presenting three types of errors:
+
+- The optimization function displays "Data Unchanged," which is relatively normal and indicates that the fitting results have reached their optimum;
+- The optimization function interrupts and displays an error in the simulator, a more challenging issue. One can attempt to rerun from the previous step, which in most cases causes this error to disappear;
+- The terminal output shows significant errors with unchanged data, requiring a nuanced discussion:
+  - If parameters reach the preset limits of the simulation, consider adjusting these limits;
+  - However, in most cases, the function simply does not operate effectively;
+    In fact, I spent a week investigating this issue without a definitive answer;
+    It was at this point that the professor reminded me **not to place blind faith in this software**.
 
 
 
@@ -748,35 +752,35 @@ Resistance and Inductance Parameters:
 
 #### IC-CAP Data Output
 
-这一部分将总结所有从IC-CAP当中读取的参数。
+This section summarizes all parameters retrieved from IC-CAP.
 
-关于这些参数的定义，请查阅上文的所有参数列表，或significant parameter的列表。这一部分主要结合ICCAP的数据提取这些参数。
+For definitions of these parameters, please refer to the list of all parameters or the list of significant parameters earlier in the document. This section primarily integrates data extraction from ICCAP to derive these parameters.
 
-以下是所有参数的读取过程：
+The following details the process of retrieving all parameters:
 
-DC Characters and Polynomial Coefficients:
+**DC Characters and Polynomial Coefficients:**
 
 - Vpks: -0.1
 
-  gm峰值位于-0.1~0之间
+  Peak gm located between -0.1 and 0
 
   <img src="assets/image-20240830181803658.png" alt="image-20240830181803658" style="zoom: 25%;" />
 
 - Ipks: 0.033
 
-  读取-0.1时候的电流值
+  Current value at Vpks=-0.1
 
-  <img src="assets/image-20240830182147730.png" alt="image-20240830182147730" style="zoom:25%;" />
+  <img src="assets/image-20240830182147730.png" alt="image-20240830182147730" style="zoom:20%;" />
 
-Capacitance Parameters and Polynomial Coefficients:
+**Capacitance Parameters and Polynomial Coefficients:**
 
-- 根据帮助文档：
+- As for the help document:
 
-  <img src="assets/image-20240830183502777.png" alt="image-20240830183502777" style="zoom: 67%;" />
+  <img src="assets/image-20240830183502777.png" alt="image-20240830183502777" style="zoom: 59%;" />
 
-  我们得到以下结果：
+  Resulting in:
 
-  <img src="assets/image-20240830185147132.png" alt="image-20240830185147132" style="zoom: 33%;" />
+  <img src="assets/image-20240830185147132.png" alt="image-20240830185147132" style="zoom: 25%;" />
 
   - Cgs0: 83;
   - Cgspi: 88;
@@ -784,13 +788,13 @@ Capacitance Parameters and Polynomial Coefficients:
   - Cgd0: 53;
   - Cgdpi: 44;
 
-- 再根据帮助文档：
+- Following another section of the help document:
 
-  <img src="assets/image-20240830190459048.png" alt="image-20240830190459048" style="zoom:67%;" />
+  <img src="assets/image-20240830190459048.png" alt="image-20240830190459048" style="zoom:59%;" />
 
-  我们针对相同的参数组合又得到了结果：
+  Produced results:
 
-  <img src="assets/image-20240830185843868.png" alt="image-20240830185843868" style="zoom: 33%;" />
+  <img src="assets/image-20240830185843868.png" alt="image-20240830185843868" style="zoom: 25%;" />
 
   - Cgs0: 20;
   - Cgspi: 150;
@@ -798,64 +802,65 @@ Capacitance Parameters and Polynomial Coefficients:
   - Cgd0: 93;
   - Cgdpi: 5;
 
-  令人担忧的是，这三个曲线并不符合帮助文档中呈现的趋势。
+  ==Concerning discrepancies as these curves do not match the trends presented in the help documentation.==
 
-- 最终根据帮助文档：
+- Final analysis according to the help document:
 
   <img src="assets/image-20240830190148155.png" alt="image-20240830190148155" style="zoom:67%;" />
 
-  观察测量结果：
+  Observing the measurement results:
 
   <img src="assets/image-20240830190213591.png" alt="image-20240830190213591" style="zoom: 25%;" />
 
   Cgdpe:5.2;
 
-Resistance and Inductance Parameters:
+**Resistance and Inductance Parameters:**
 
-- 根据帮助文档，这一部分的数据主要来源于 Cold FET 的 setup
+- Based on the Cold FET setup in the help document:
 
   <img src="assets/image-20240830192426827.png" alt="image-20240830192426827" style="zoom:67%;" />
 
-  根据；论文叙述，提取电阻值应该使用低频的flat range，电感值应使用高频的flat range
+  According to the paper, resistance values should be extracted from the low-frequency flat range, and inductance values from the high-frequency flat range:
 
-  <img src="assets/image-20240830193841287.png" alt="image-20240830193841287" style="zoom:33%;" />
+  <img src="assets/image-20240830193841287.png" alt="image-20240830193841287" style="zoom:29%;" />
 
-  读出以下电阻值：
+  For the resistance：
 
   - Rg: 25.2;
   - Rd: 13.0;
   - Rs: 9.2;
 
-  读出以下电容值：
+  For the capacitance：
 
   - Lg: 20.0;
   - Ld: 39.4;
   - Ls: -9.4;
 
-  这里有两点非常令人担心：
 
-  1. Demo Project和这里的低频都没有呈现出flat range；
-  2. Ls得到的不是正数。
+==Two points of concern:== 
 
-- 接下来读取Ri:
+1. Neither the Demo Project nor the low-frequency range exhibited a flat range;
+2. Ls resulted in a negative value.
 
-  <img src="assets/image-20240830195421595.png" alt="image-20240830195421595" style="zoom:33%;" />
+- Reading of Ri:
+
+  <img src="assets/image-20240830195421595.png" alt="image-20240830195421595" style="zoom:25%;" />
 
   Ri = 8.0;
 
-- 最终读取Rgd
+- Reading of Rgd:
 
-  <img src="assets/image-20240830200543270.png" alt="image-20240830200543270" style="zoom:33%;" />
+  <img src="assets/image-20240830200543270.png" alt="image-20240830200543270" style="zoom:25%;" />
 
   Rgd = 27.2.
 
 #### Manual Extractions
 
-由于IC-CAP的软件问题，在extract和tuning的过程中有一系列参数并不能被有效提取，因此我们进行一系列的手动提取，来获得能够被用于建模的参数。
+Due to software issues with IC-CAP, a series of parameters could not be effectively extracted during the extraction and tuning process. Consequently, we undertook a series of manual extractions to obtain parameters suitable for modeling.
 
 DC Characters and Polynomial Coefficients:
 
-- P1：这一步通过计算峰值处的gm与对应的id之比得到：
+- P1：This step involves calculating the ratio of the maximum transconductance (gm) to the corresponding drain current (Id):
 
   <img src="assets/image-20240830204111216.png" alt="image-20240830204111216" style="zoom: 33%;" />
   $$
@@ -864,18 +869,18 @@ DC Characters and Polynomial Coefficients:
 
 Capacitance Parameters and Polynomial Coefficients:
 
-在这一部分，我们需要：
+In this section, we need to:
 
-1. 我们首先需要根据帮助文档中提供的信息，确定提取参数需将数据抄写至MATLAB；
-2. 基于论文中参数的定义，进行相关的函数运算，并进行线性拟合。
+1. First, determine the parameters to be extracted by transcribing data into MATLAB based on the information provided in the help documentation.
+2. Perform function operations and linear fitting based on the definitions of parameters described in the literature.
 
-具体而言，我们按照以下方式完成这一过程：
+Specifically, we complete this process in the following steps:
 
-首先，我们阅读帮助文档中对电容多项式参数的表述：
+Initially, we consult the help documentation for descriptions of the polynomial coefficients for capacitance.
 
-<img src="assets/image-20240830223545909.png" alt="image-20240830223545909" style="zoom: 33%;" />
+<img src="assets/image-20240830223545909.png" alt="image-20240830223545909" style="zoom: 30%;" />
 
-然后，我们将数据导入MATLAB：
+Then, we copy the data into MATLAB：
 
 ```matlab
 vg = [-3:0.2:0];
@@ -892,27 +897,27 @@ cgdpi =     44;
 cgd0 =      53;
 ```
 
-我们可以进行绘图，来确保数据的正确性：
+We could plot the values for double check.
 
-<img src="assets/image-20240830214409838.png" alt="image-20240830214409838" style="zoom: 50%;" />
+<img src="assets/image-20240830214409838.png" alt="image-20240830214409838" style="zoom: 45%;" />
 
-我们可以查阅这一过程在文章中的表达：
+We could check the formulas in the Angelov's papers:
 
 <img src="assets/image-20240830214703000.png" alt="image-20240830214703000" style="zoom:50%;" />
 
-其中：
+Where:
 
 <img src="assets/image-20240830214715663.png" alt="image-20240830214715663" style="zoom:50%;" />
 
-接下来，我们以此对上述参数进行计算
+Then, we shall calculate:
 
 - **P11 P10:**
 
-  我们计算以下函数：
+  We got:
 
   <img src="assets/image-20240830220206120.png" alt="image-20240830220206120" style="zoom:50%;" />
 
-  我们通过MATLAB进行运算，并进行线性拟合：
+  Performance linear regression in MATLAB:
 
   ```MATLAB
   % p11vgs+p10
@@ -934,11 +939,12 @@ cgd0 =      53;
   plot(vg(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
   ```
 
-  运行结果如下，这一步忽略了虚部，但没有影响最终结果：
+  Performance linear regression in MATLAB:
+  The result is as follow. Here we ignored the imaginary part, but the result is not affected:
 
   <img src="assets/image17250704836580.png" alt="img" style="zoom:67%;" />
 
-  最终我们得到：
+  Finally:
 
   ```
   p11p10 = 1×2
@@ -947,11 +953,11 @@ cgd0 =      53;
 
 - **P41 P40:**
 
-  我们计算以下函数：
+  We got:
 
   <img src="assets/image-20240830220238640.png" alt="image-20240830220238640" style="zoom:50%;" />
 
-  我们通过MATLAB进行运算，并进行线性拟合：
+  Performance linear regression in MATLAB:
 
   ```MATLAB
   % p41vds+p40
@@ -973,11 +979,11 @@ cgd0 =      53;
   plot(vg(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
   ```
 
-  运行结果如下这一步忽略了虚部，但没有影响最终结果：
+  The result is as follow. Here we ignored the imaginary part, but the result is not affected:
 
   <img src="assets/image17250704696440.png" alt="img" style="zoom:67%;" />
 
-  最终我们得到：
+  Finally:
 
   ```
   p41p40 = 1×2
@@ -986,11 +992,11 @@ cgd0 =      53;
 
 - **P21 P20:**
 
-  我们计算以下函数：
+  We got:
 
   <img src="assets/image-20240830220307897.png" alt="image-20240830220307897" style="zoom:50%;" />
 
-  我们通过MATLAB进行运算，并进行线性拟合：
+  Performance linear regression in MATLAB:
 
   ```MATLAB
   % p21vds+p20
@@ -1013,26 +1019,26 @@ cgd0 =      53;
   plot(vd(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
   ```
 
-  运行结果如下：
+  The result:
 
   <img src="assets/image17250704995060.png" alt="img" style="zoom:67%;" />
 
-  最终我们得到：
+  Finally:
 
   ```
   p21p20 = 1×2
      -0.0637   -0.5204
   ```
 
-  ==这一步存在问题：Simulator支持的P21最小值为0.1。==
+  ==Here comes the problem: The minimum value that the simulator could take for P21 is 0.1.==
 
 - **P31 P30:**
 
-  我们计算以下函数：
+  We got:
 
   <img src="assets/image-20240830220325701.png" alt="image-20240830220325701" style="zoom:50%;" />
 
-  我们通过MATLAB进行运算，并进行线性拟合：
+  Performance linear regression in MATLAB:
 
   ```MATLAB
   % p31vds+p30
@@ -1062,24 +1068,24 @@ cgd0 =      53;
   plot(vd(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
   ```
 
-  运行结果如下，这一步忽略了虚部，**且影响最终结果**：
+  ==The result is as follow. Here we ignored the imaginary part, AND the result IS affected:==
 
   <img src="assets/image17250717725520.png" alt="img" style="zoom:67%;" />
 
-  最终我们得到：
+  Finally:
 
   ```
   p31p30 = 1×2 complex
     -0.2156 - 0.7854i   0.6075 + 1.5708i
   ```
 
-  ==也就是在这一步中产生了虚数，这是不能被simulator利用的。==
+  ==Here we got the imaginary number, which could not be used in the simulator.==
 
 #### Result of Extractions
 
-截止到这步，我们已经得到的数据如下所示，其中存在问题的数据已高亮显示：
+Up to now, we have got the following parameters. Errors are highlighted.
 
-DC Characters and Polynomial Coefficients:
+**DC Characters and Polynomial Coefficients:**
 
 | Parameter | Definition and Description                                   | Original Value |
 | --------- | ------------------------------------------------------------ | -------------- |
@@ -1095,7 +1101,7 @@ DC Characters and Polynomial Coefficients:
 | Lambda1   | Channel length modulation parameter                          | ==NA==         |
 | Ij        | Gate forward saturation current                              | ==NA==         |
 
-Capacitance Parameters and Polynomial Coefficients:
+**Capacitance Parameters and Polynomial Coefficients:**
 
 | Parameter | Definition and Description             | Original Value  |
 | --------- | -------------------------------------- | --------------- |
@@ -1114,7 +1120,7 @@ Capacitance Parameters and Polynomial Coefficients:
 | P40       | Polynomial coefficient for capacitance | 1.35            |
 | P41       | Polynomial coefficient for capacitance | 1.99            |
 
-Resistance and Inductance Parameters:
+**Resistance and Inductance Parameters:**
 
 | Parameter | Definition and Description | Original Value |
 | --------- | -------------------------- | -------------- |
@@ -1133,119 +1139,121 @@ Resistance and Inductance Parameters:
 
 #### Export IC-CAP Models to ADS
 
-IC-CAP官方帮助文档中的方法并不完全可用。
+The methods described in the IC-CAP official help documentation are not entirely applicable.
 
-从IC-CAP完成数据导出后，IC-CAP将导出两个文件：
+Upon completing data export from IC-CAP, two files are generated:
+1. A `.lib` file containing the name of the simulator.
+2. A `.mps` file named after the IC-CAP project.
 
-1. 含有simulator名字的`.lib`文件
-2. 以IC-CAP项目名称为文件名的`.mps`文件
+To import these files into ADS, the following steps are necessary:
 
-将导出的文件导入到ADS，首先需要进行以下操作：
+1. Given that the Angelov GaN model employs Verilog-A, it is imperative to incorporate the Verilog-A design kit first. According to the ADS manual, the specific procedures are as follows:
+   > 0. From the ADS Main window, select DesignKit > Manage Favorite Design Kits to open the Manage Favorite Design Kits dialog box.
+   > 1. As the Design Kit is provided as an unzipped file, click Add Library Definition File and navigate to $HPEESOF_DIR/tiburonda/ads/designkits/tiburon-da_veriloga (path under the ADS installation directory).
+   > 2. Choose the lib.defs file and select Open.
+   > 3. In the subsequent Add Design Kit dialog box, confirm addition of the design kit to the current workspace by clicking OK.
+   > 4. If a design is open, a warning stating “All designs must be closed to Add a Design Kit” will appear.
+   > 5. Close all designs and click OK to add the design kit to your workspace.
+   > 6. After closing the Manage Favorite Design Kits dialog box, open a schematic window. The Devices-Verilog-A palette should now appear in the Component Palette List, as depicted below showing icons for each device and model available.
 
-1. 由于angelov GaN是veriloga的模型，所以要先把veriloga的designKit加进来。根据ADS的manual，下面是这一步的具体操作：
+2. Loading the Model card can be accomplished by two approaches:
+   1. Use tools->IC-CAP import->Any Device, enter `angelov_gan_va_Model` (mind the case sensitivity), then select the previously generated .mps document in the dialog that appears. The outcome after loading will be ready for further operations.
+   2. Use DynamicLink->Add Netlist File Include. Double-click the icon and select the previously generated .lib file (ensure the path to the Verilog-A file in the lib is correct).
 
-   > 0. Navigate from the ADS Main window: Choose DesignKit > Manage Favorite Design Kits to display the Manage Favorite Design Kits dialog box.
-   > 1.  Since the Design Kit is delivered as an unzipped file, simply click the Add Library Definition File and browse to $HPEESOF_DIR/tiburonda/ads/designkits/tiburon-da_veriloga.（ADS安装路径下）
-   > 2. Select the lib.defs file and click Open.
-   > 3. The Add Design Kit dialog box appears to add the design kit to current workspace. Click OK.
-   > 4. If a design is open, a warning “All designs must be closed to Add a Design Kit” appears.
-   > 5. Close all the designs and click OK to add the design kit to your current workspace.
-   > 6. Close the Manage Favorite Design Kits dialog box and open a schematic window. The Devices-Verilog-A palette should now be available in the Component Palette List. The following figure shows the icons for each of the devices and models available in the Devices-Verilog-A palette.
-
-2. load Model card，有两种解决办法：
-
-   1. 使用tools->IC-CAP import->Any Device选择之后，输入angelov_gan_va_Model (注意大小写)然后弹出对话框，选择之前生成的mps文档。load好之后的结果；
-   2. 使用DynamicLink->Add Netlist File Include。双击图标选择 之前生成的lib即可。(注意lib里load verilogA文件的路径一定要正确) 
-
-   a和b相比，a会更灵活一些，可以进行参数的tunning，而b作为ICCAP推荐的方法，只能基于导出的文件进行仿真。
+   Compared to method 2, method 1 offers more flexibility allowing for parameter tuning, whereas method 2, as recommended by ICCAP, confines the simulation to the exported files only.
 
 #### Simulations Setups
 
-我们可以在ADS当中搭建测试电路：
+We could build up the simulation circuits in ADS.
 
-DC的仿真电路如下：
+**For DC:**
 
-![4b123e625db0490b7b22748d44c1a5fc](./assets/4b123e625db0490b7b22748d44c1a5fc.png)
+<img src="./assets/4b123e625db0490b7b22748d44c1a5fc.png" alt="4b123e625db0490b7b22748d44c1a5fc" style="zoom:25%;" />
 
-S参数的仿真电路如下：
+**For S-Parameter:**
 
-![0786d7e6f752e8047ba5176d4e5354d3](./assets/0786d7e6f752e8047ba5176d4e5354d3.png)
+<img src="./assets/0786d7e6f752e8047ba5176d4e5354d3.png" alt="0786d7e6f752e8047ba5176d4e5354d3" style="zoom:25%;" />
 
-在仿真电路搭建完成后，我们依然可能会面临问题。以下是两个常见问题的解决方案：
+After the simulation circuit construction is complete, we may still encounter certain issues. Here are solutions to two common problems:
 
-1. 如果simulator给出warning，我们可以通过给端口进行命名的方式进行解决
-2. 如果simulator在仿真中报错，显示所给的instance存在问题，可能是存在以下两个问题：
-   1. 参数模型和FET没有采用相同的模型，我们必须确保两个模型要么都是ADS的原生格式，要么都是VerilogA模式
-   2. 参数模型的名称可能与FET模型的不同
+1. If the simulator issues a warning, this can typically be resolved by naming the ports appropriately.
+2. If the simulator reports an error during simulation, indicating an issue with the provided instance, the following two problems may be present:
+   1. The parameter model and the FET might not be using the same model type. It is essential to ensure that both models are either in the native ADS format or in the VerilogA format.
+   2. The name of the parameter model may differ from that of the FET model.
 
 #### Preparations for Simulations Result Analysis
 
-只观察仿真结果难以观察fitting的结果。我们需要将IC-CAP的测量结果导入到ADS当中，和仿真测试进行对比。
+Observing simulation results alone is insufficient for evaluating the fitting outcomes. It is essential to import IC-CAP measurement results into ADS for comparison with simulation tests.
 
-但是很遗憾，我尝试了相当多版本的ADS（从2017到2024），所有的ADS版本使用report页面的Data Tools工具，直接基于ICCAP的默认输出`.mdl`格式进行导入都会产生问题。我们尝试在各种技术论坛中进行了检索，目前没有找到这一问题的准确答复。
+Regrettably, attempts to import the default `.mdl` output from IC-CAP into various versions of ADS (ranging from 2017 to 2024) using the Data Tools option in the report page have consistently resulted in issues. Extensive searches in various technical forums have yet to yield a definitive solution.
 
-在这一过程中，很有可能会覆盖掉之前已经仿真出的数据，使数据从 data set 界面当中消失。但是我们可以通过重新运行指定cell的仿真来恢复被复写为空文件的仿真数据。
+During this process, there is a risk of overwriting existing simulated data, causing it to disappear from the data set interface. However, the overwritten simulation data can be recovered by re-running the simulation for the specified cell.
 
-但是，我们找到了间接性解决这一问题的方法，DC与RF的方法略有不同：
+We have identified indirect methods to address this issue, with slight variations for DC and RF measurements:
 
-- 对于DC测量数据，我们可以这样将其导入ADS：
-  1. 在IC-CAP中选择File-Export
-  2. 选择将测量数据导出为`.ds`文件，这是ADS的原生数据显示格式
-  3. 将导出得到的`.ds`文件直接导入ADS项目的data文件夹
-  4. 检索需要使用的数据，其中以.m为结尾的是测量文件，以.s为结尾的是仿真文件
-  5. 选择适当的数据和verses关系，绘制iv curve
-- 对于RF测量数据，我们可以这样将其导入ADS：
-  1. 在IC-CAP中选择Save As
-  2. 将需要导出的`.mdl`另存为`.dut`格式
-  3. 在ADS中使用Data Tool，选定需要导入的文件
-  4. 在下方数据名称输入不重复的名称
-  5. 选择IC-CAP进行数据导入
-  6. 数据格式被ADS自动写为`.ds`
-  7. 检索数据，其中.sd()为已经过de-embed计算的数据，.s()是未经过de-embed的测量数据
-  8. 直接选择合适的数据进行对比绘图
+- **For DC Measurement Data Import into ADS**:
+  1. In IC-CAP, select `File > Export`.
+  2. Export the measurement data as a `.ds` file, which is the native data format for ADS.
+  3. Import the exported `.ds` file directly into the data folder of the ADS project.
+  4. Retrieve the necessary data, where files ending in `.m` are measurement files and those ending in `.s` are simulation files.
+  5. Select the appropriate data and verses relationships to plot the IV curve.
 
-将数据导入后，我们可以进行对比，从而得知数据拟合结果的理想程度。但我曾花费时间来纠正以下几点误区：
+- **For RF Measurement Data Import into ADS**:
+  1. In IC-CAP, choose `Save As`.
+  2. Save the required `.mdl` file as a `.dut` file.
+  3. In ADS, use the Data Tool to select the file to import.
+  4. Enter a unique name for the data at the bottom.
+  5. Choose IC-CAP for data import.
+  6. The data format will be automatically written as `.ds` by ADS.
+  7. Retrieve the data, where `.sd()` indicates data calculated with de-embed and `.s()` indicates raw measurement data.
+  8. Directly select the appropriate data for comparative plotting.
 
-1. 对于DC：
-   1. 我们可以选择开启数据标签显示，从而得知是否针对正确的Vgs进行了拟合
-   2. 对于不同工作区拟合情况不同的情况，我们可以分别绘图，从而实现更好的数据可视化
-2. 对于RF
-   1. 合理规划频率扫描的step，可以极大程度上提高仿真效率，和数据的显示效果
-      1. 在参数调整过程中，适当增加step可以提高仿真速率
-      2. 在结果分析过程中，适当减少step可以更清晰地看到数据的拟合情况
+After importing the data, comparisons can be made to assess the adequacy of the fitting results. However, I have spent time addressing the following misconceptions:
 
-但是，目前我依然存在一个问题，没有解决：RF的测量默认显示为线，但是仿真结果只能选择散点一种形式。这极大程度上不利于呈现仿真结果的观察。我注意到在Angelov的论文当中也使用了相似的数据呈现形式，我怀疑这是一个ADS仿真过程中普遍存在的问题。
+- **For DC**:
+  1. Data labels can be enabled to verify that fitting was done correctly for the specified Vgs.
+  2. Different operational areas with varying fitting quality can be plotted separately to enhance data visualization.
+
+- **For RF**:
+  1. Properly planning the frequency scan step can significantly improve simulation efficiency and data display.
+      1. Increasing the step during parameter adjustment can speed up the simulation.
+      2. Reducing the step during result analysis can clarify the data fitting situation.
+
+However, I still face an unresolved issue: RF measurements default to line display, but simulation results can only be presented as dots. This greatly hinders the visibility of simulation outcomes. I noticed a similar data presentation style in Angelov's papers, leading me to suspect this may be a common issue in ADS simulations.
 
 #### Original Results
 
-我们直接将Extract出来的函数输入仿真器，观察结果。蓝色是测量，红色是仿真。
+The extracted functions were directly input into the simulator to observe the results, where the measured data is represented in blue and the simulated data in red.
 
-DC的仿真结果如下：
+**DC Simulation Results:**
 
 ![image-20240830225750849](assets/image-20240830225750849.png)
 
-对于S参数，我们仿真三个场景。第一个是cold FET：
+**S-Parameter Simulations were conducted in three scenarios:**
 
-<img src="assets/image-20240830230104666.png" alt="image-20240830230104666" style="zoom:45%;" />
+Cold FET:
 
-第二个是在没有施加Vds的前提下，扫描Vgs：
+<img src="assets/image-20240830230104666.png" alt="image-20240830230104666" style="zoom:38%;" />
 
-<img src="assets/image-20240830230634926.png" alt="image-20240830230634926" style="zoom:33%;" />
+Vgs Scan without applying Vds:
 
-第三个是在Vgs=1.75，这里是gm pinch off的地方，我们从0-28V扫描Vds：
+<img src="assets/image-20240830230634926.png" alt="image-20240830230634926" style="zoom:29%;" />
 
-<img src="assets/image-20240830230305278.png" alt="image-20240830230305278" style="zoom:33%;" />
+Vds Scan from 0-28V at Vgs = 1.75, where gm pinch-off occurs:
 
-> 看到结果的时候心都要碎了，
-> 因为教授会说我的结果看起来很funny。
+<img src="assets/image-20240830230305278.png" alt="image-20240830230305278" style="zoom:29%;" />
+
+> Upon reviewing the results, 
+> It was disheartening to observe the discrepancies between the simulations and the measurements,
+> Especially considering the professor's likely critique that the outcomes look 'funny'.
 
 #### Optimization of Significant Parameters in ADS
 
-这一部分将结合上述核心参数列表，主要从仿真结果的角度出发，说明各个参数对于仿真结果的影响
+This section will synthesize the core parameters listed above, primarily from the perspective of simulation results, to elucidate the impact of each parameter on the outcomes of the simulations.
 
-对于直接使用提取数据难以完成fitting的场景，可以基于这一部分对最终的结果进行调整，以抵消测量误差对于仿真结果的影响。
+In scenarios where direct usage of extracted data fails to complete the fitting process, adjustments based on this section can be made to mitigate the influence of measurement errors on the simulation results.
 
-但是，由于这一部分的内容并不基于文献与测量结果，请辩证性看待这一系列结论，并在调整项目的过程中保持谨慎。
+However, since the content in this part is not based on documented literature or measurement results, it is advisable to critically evaluate these conclusions. Caution should be maintained during the adjustment process.
 
 DC Characters and Polynomial Coefficients:
 
@@ -1297,23 +1305,23 @@ Resistance and Inductance Parameters:
 
 #### Fitting Results (Updated at Aug 29 2024)
 
-这一部分将介绍目前最新得到的仿真结果，并对目前存在的困难进行分析。
-
-DC的仿真结果如下：
+**DC Simulation Results:**
 
 <img src="assets/image-20240831011019707.png" alt="image-20240831011019707" style="zoom:33%;" />
 
-对于S参数，我们仿真三个场景。第一个是cold FET：
+**S-Parameter Simulations were conducted in three scenarios:**
+
+Cold FET:
 
 <img src="assets/image-20240830234212067.png" alt="image-20240830234212067" style="zoom:33%;" />
 
-第二个是在没有施加Vds的前提下，扫描Vgs：
+Vgs Scan without applying Vds:
 
-<img src="assets/image-20240830233504228.png" alt="image-20240830233504228" style="zoom:33%;" />
+<img src="assets/image-20240830233504228.png" alt="image-20240830233504228" style="zoom:27%;" />
 
-第三个是在Vgs=1.75，这里是gm pinch off的地方，我们从0-28V扫描Vds:
+Vds Scan from 0-28V at Vgs = 1.75, where gm pinch-off occurs:
 
-<img src="assets/image-20240831010035759.png" alt="image-20240831010035759" style="zoom:33%;" />
+<img src="assets/image-20240831010035759.png" alt="image-20240831010035759" style="zoom:27%;" />
 
 
 
@@ -1329,66 +1337,121 @@ DC的仿真结果如下：
 
 ![image-20240829195954382](./assets/image-20240829195954382.png)
 
-### ==Hand-Scripts of Angelov Model Parameter Extractions==
+
+
+### Hand-Scripts of Angelov Model Parameter Extractions
+
+<img src="./assets/image-20240901024624016.png" alt="image-20240901024624016" style="zoom:36%;" />
+
+A little bit extensive, lease check the full file on my Github `/billboard`:
+
+<img src="./assets/image-20240901025253046.png" alt="image-20240901025253046" style="zoom:44%;" />
+
+<center>https://github.com/EliotChen8/Characterization-and-Modeling-of-GaN-HEMTs/tree/main/billboard</center>
+
+
+
+### Mindmap for Measurement Troubleshooting
+
+A `.xmind` native file, please check the full file on my Github `/billboard`:
+
+<img src="./assets/image-20240901025253046.png" alt="image-20240901025253046" style="zoom:44%;" />
+
+<center>https://github.com/EliotChen8/Characterization-and-Modeling-of-GaN-HEMTs/tree/main/billboard</center>
+
+
+
+### List of Parameter at Excel
+
+A `.xlsx` native file, please check the full file on my Github `/billboard`:
+
+<img src="./assets/image-20240901025253046.png" alt="image-20240901025253046" style="zoom:44%;" />
+
+<center>https://github.com/EliotChen8/Characterization-and-Modeling-of-GaN-HEMTs/tree/main/billboard</center>
+
+
 
 ### Notes on the IC-CAP Help Doc
 
-#### Parameter Extraction Flow Example
+A little bit extensive, please check the full file on my Github `/billboard`:
 
-0. Example Parameter Extraction Flow
+<img src="./assets/image-20240901025253046.png" alt="image-20240901025253046" style="zoom:44%;" />
 
-   ![image-20240829192455824](assets/image-20240829192455824.png)
+<center>https://github.com/EliotChen8/Characterization-and-Modeling-of-GaN-HEMTs/tree/main/billboard</center>
 
-1. Initialize![image-20240829192618897](assets/image-20240829192618897.png)
 
-2. DC Port Resistance![image-20240829192754002](assets/image-20240829192754002.png)
 
-3. SP Cold FET![image-20240829193229308](assets/image-20240829193229308.png)
+### See also: The Draft of Dual-Language 
 
-![image-20240829193250725](assets/image-20240829193250725.png)
+Hi, our friends from Taiwan! 
+Please check the full file on my Github `/document`:
 
-4. Gate Diode
+<img src="./assets/image-20240901025424243.png" alt="image-20240901025424243" style="zoom:44%;" />
 
-   ![image-20240829193426731](assets/image-20240829193426731.png)
+<center>https://github.com/EliotChen8/Characterization-and-Modeling-of-GaN-HEMTs/tree/main/document</center>
 
-   ![image-20240829193453155](assets/image-20240829193453155.png)
 
-   ![image-20240829193535115](assets/image-20240829193535115.png)
-
-   ![image-20240829193552364](assets/image-20240829193552364.png)
-
-5. idvg & idvd
-
-   ![image-20240829193653055](assets/image-20240829193653055.png)
-
-   ![image-20240829193715716](assets/image-20240829193715716.png)
-
-   ![image-20240829193749966](assets/image-20240829193749966.png)
-
-   ![image-20240829193811622](assets/image-20240829193811622.png)
-
-   ![image-20240829193841299](assets/image-20240829193841299.png)
-
-6. SP
-
-   ![image-20240829194108905](assets/image-20240829194108905.png)
-
-   ![image-20240829194126101](assets/image-20240829194126101.png)
-
-   ![image-20240829194205151](assets/image-20240829194205151.png)
-
-   ![image-20240829194216313](assets/image-20240829194216313.png)
-
-   ![image-20240829194241064](assets/image-20240829194241064.png)
-
-   ![image-20240829194256350](assets/image-20240829194256350.png)
-
-7. Finalize: Saving all parameters in the model files
 
 [Back to Table of Contents](# Characterization and Modeling of GaN HEMTs)
 
 <div STYLE="page-break-after: always;"></div>
 
-## ==Reference==
+## Reference
+
+[1] Y. W. W. Zhang, “An Angelov Large Signal Model and its Parameter Extraction Strategy for GaAs HEMT”.
+
+[2] “GaN based gas sensors - Department of Electrical and Electronics Engineering.” Accessed: Aug. 31, 2024. [Online]. Available: https://eee.sustech.edu.cn/?p=3186&lang=en
+
+[3] W. R. Curtice, “A MESFET Model for Use in the Design of GaAs Integrated Circuits,” IEEE Transactions on Microwave Theory and Techniques, vol. 28, no. 5, pp. 448–456, May 1980, doi: 10.1109/TMTT.1980.1130099.
+
+[4] I. Angelov, H. Zirath, and N. Rosman, “A new empirical nonlinear model for HEMT and MESFET devices,” IEEE Transactions on Microwave Theory and Techniques, vol. 40, no. 12, pp. 2258–2266, Dec. 1992, doi: 10.1109/22.179888.
+
+[5] I. Angelov, L. Bengtsson, and M. Garcia, “Extensions of the Chalmers nonlinear HEMT and MESFET model,” IEEE Transactions on Microwave Theory and Techniques, vol. 44, no. 10, pp. 1664–1674, Oct. 1996, doi: 10.1109/22.538957.
+
+[6] P. Fay, K. Stevens, J. Elliot, and N. Pan, “Gate length scaling in high performance InGaP/InGaAs/GaAs pHEMTs,” IEEE Electron Device Letters, vol. 21, no. 4, pp. 141–143, Apr. 2000, doi: 10.1109/55.830961.
+
+[7] I. Angelov, V. Desmaris, K. Dynefors, P. A. Nilsson, N. Rorsman, and H. Zirath, “On the large-signal modelling of AlGaN/GaN HEMTs and SiC MESFETs,” in European Gallium Arsenide and Other Semiconductor Application Symposium, GAAS 2005, Oct. 2005, pp. 309–312. Accessed: Jul. 18, 2024. [Online]. Available: https://ieeexplore.ieee.org/document/1637212/?arnumber=1637212
+
+[8] J. R. Loo-Yau, J. A. Reynoso-Hernández, J. E. Zuñiga, F. I. Hirata-Flores, and H. Ascencio-Ramírez, “Modeling the I-V characteristics of the power microwave FETs with the Angelov model using pulse measurements,” Microwave and Optical Technology Letters, vol. 48, no. 6, pp. 1046–1050, 2006, doi: 10.1002/mop.21596.
+
+[9] I. Angelov et al., “Large-signal modelling and comparison of AlGaN/GaN HEMTs and SiC MESFETs,” Jan. 2007, pp. 279–282. doi: 10.1109/APMC.2006.4429422.
+
+[10] I. Angelov, M. Thorsell, K. Andersson, A. Inoue, K. Yamanaka, and H. Noto, “On the Large Signal Evaluation and Modeling of GaN FET,” IEICE Transactions on Electronics, vol. 93, pp. 1225–1233, Jan. 2010, doi: 10.1587/transele.E93.C.1225.
+
+[11] Z. Wen, Y. Xu, C. Wang, X. Zhao, and R. Xu, “An efficient parameter extraction method for GaN HEMT small-signal equivalent circuit model,” International Journal of Numerical Modelling: Electronic Networks, Devices and Fields, vol. 30, p. n/a-n/a, Dec. 2015, doi: 10.1002/jnm.2127.
+
+[12] Power Devices and Circuits, GaN Power devices - the HEMT, (Jan. 18, 2016). Accessed: Jul. 18, 2024. [Online Video]. Available: https://www.youtube.com/watch?v=UJqY00xPWmY
+
+[13] P. Luo, O. Bengttson, and M. Rudolph, “Reliable GaN HEMT modeling based on Chalmers model and pulsed S-parameter measurements,” in 2016 German Microwave Conference (GeMiC), Mar. 2016, pp. 441–444. doi: 10.1109/GEMIC.2016.7461650.
+
+[14] H. Zhang, “Physics Based Virtual Source Compact Model of Gallium-Nitride High Electron Mobility Transistors,” 2017.
+
+[15] S. Emekar et al., “Modified angelov model for an exploratory GaN-HEMT technology with short, few-fingered gates,” in 2017 International Conference on Simulation of Semiconductor Processes and Devices (SISPAD), Sep. 2017, pp. 117–120. doi: 10.23919/SISPAD.2017.8085278.
+
+[16] P. Luo, F. Schnieder, and M. Rudolph, “Chalmers GaN HEMT charge model revisited,” in 2018 11th German Microwave Conference (GeMiC), Mar. 2018, pp. 164–167. doi: 10.23919/GEMIC.2018.8335055.
+
+[17] Keysight Design Software, RF GaN Device Models and Extraction Techniques, (Aug. 30, 2019). Accessed: Jul. 18, 2024. [Online Video]. Available: https://www.youtube.com/watch?v=GcWPuKHvexw
+
+[18] Z. Zhao et al., “Highly accurate GaN HEMT model based on the Angelov model with error compensation,” Microwave and Optical Technology Letters, vol. 62, no. 11, pp. 3505–3513, 2020, doi: 10.1002/mop.32497.
+
+[19] Upplysning Robotics SMC PVT LTD, Large Signal Model of a GaN HEMT Transistor., (Dec. 23, 2021). Accessed: Jul. 23, 2024. [Online Video]. Available: https://www.youtube.com/watch?v=kxuAgDTlGt8
+
+[20] Keysight Design Software, Flexible Extraction of Today’s Wide-Bandgap Device Models with IC-CAP GaN RF Solutions, (Aug. 10, 2022). Accessed: Jul. 18, 2024. [Online Video]. Available: https://www.youtube.com/watch?v=eyOnfy5nJg0
+
+[21] “High-electron-mobility transistor,” Wikipedia. Jun. 29, 2024. Accessed: Jul. 16, 2024. [Online]. Available: https://en.wikipedia.org/w/index.php?title=High-electron-mobility_transistor&oldid=1231622665
+
+[22] “PathWave Device Modeling,” 2021.
+
+[23] Keysight EEsof AE Tips, ICCAP: Using the GaN ASM-HEMT Model Extraction Procedure, (Jul. 08, 2022). Accessed: Jul. 23, 2024. [Online Video]. Available: https://www.youtube.com/watch?v=05-pNz5W8_0
+
+[24] Keysight Design Software, Introducing the IC-CAP Model Generator, (Mar. 21, 2023). Accessed: Jul. 23, 2024. [Online Video]. Available: https://www.youtube.com/watch?v=tj_Foog9XEU
+
+[25] “ADS导入Angelov模型_ads中集成的angelov器件模型有哪些-CSDN博客.” Accessed: Aug. 12, 2024. [Online]. Available: https://blog.csdn.net/qq_43190217/article/details/126717883
+
+[26] “GaN射频功率器件的测试、建模及验证完整解决方案.” Accessed: Aug. 12, 2024. [Online]. Available: https://www.sekorm.com/news/64407394.html
+
+[27] “Apply Angelov GaN Model Extracted by IC-CAP in ADS | LinkedIn.” Accessed: Aug. 12, 2024. [Online]. Available: https://www.linkedin.com/pulse/apply-angelov-gan-model-extracted-ic-cap-ads-shuang-cai/
+
+
 
 [Back to Table of Contents](#Characterization and Modeling of GaN HEMT)
