@@ -6,21 +6,41 @@
 
 [TOC]
 
-## ==Introduction==
+## Introduction
 
-### ==Overview==
+### Overview
 
-#### ==About this Work==
+#### About this Work
 
-这一部分将概述本次暑期科研的工作
+In this work：
 
-#### ==About this Documents==
+- 我们学习了GaN HEMTs的基本概念，对于Angelov GaN Model的理论进行了学习与分析；
+- 我们对于UltrabandTech提供的GaN HEMT样本，使用IC-CAP设计并完成了基于测量的characterization workflow;
+- 我们总结了Angelov GaN的模型参数，使用ICCAP和MATLAB对模型参数进行了提取；
+- 我们利用参数在ADS中构建了模型，进行优化使之与器件character更fit，致力于将器件应用于电路设计。
 
-这一部分将介绍本文件的主要内容和outline思维导图
+#### About this Documents
 
-#### ==Updates and Releases==
+这是本次暑期科研项目的总结性文件。我将从以下三方面介绍本次科研的工作：
 
-这一部分将包含本次项目文件的下载方式和更新渠道
+- 基本概念和情况的Introduction；
+- characterization的具体过程；
+- 基于提取参数、仿真和优化的modeling过程；
+
+本次假期做出了很多尝试，遇到了很多挫折。我在本文中将我所有获得的经验记录下来。
+内容较多，为了避免迷失，以下是本文的思维导图：
+
+![image-20240831222238117](./assets/image-20240831222238117.png)
+
+#### Releases and Updates
+
+本片文章和项目中产生的其他文档，我将开源在我的GitHub仓库。
+
+<img src="./assets/db813e2f438a55d99c73d05254a20fd1.png" alt="db813e2f438a55d99c73d05254a20fd1" style="zoom:36%;" />
+
+<center>https://github.com/EliotChen8/Characterization-and-Modeling-of-GaN-HEMTs</center>
+
+对内容的releases and updates，请同样关注以上链接。
 
 
 
