@@ -550,7 +550,7 @@ In this instance, no calibration pads were fabricated on the wafer. Consequently
 
 <img src="assets/image-20240831153311382.png" alt="Pad Image" style="zoom:27%;" />
 
-==However, there are two potential risks associated with this approach that might introduce errors into the de-embedd results:==
+==FIXME: However, there are two potential risks associated with this approach that might introduce errors into the de-embedd results:==
 
 1. The wafer does not contain a 2x50 pad; the closest available was a 2x37.5, which we measured instead;
 2. The pad used for de-embedding was not from the same sample.
@@ -802,7 +802,7 @@ The following details the process of retrieving all parameters:
   - Cgd0: 93;
   - Cgdpi: 5;
 
-  ==Concerning discrepancies as these curves do not match the trends presented in the help documentation.==
+  ==FIXME: Concerning discrepancies as these curves do not match the trends presented in the help documentation.==
 
 - Final analysis according to the help document:
 
@@ -836,8 +836,7 @@ The following details the process of retrieving all parameters:
   - Ld: 39.4;
   - Ls: -9.4;
 
-
-==Two points of concern:== 
+==FIXME: Two points of concern:== 
 
 1. Neither the Demo Project nor the low-frequency range exhibited a flat range;
 2. Ls resulted in a negative value.
@@ -1030,7 +1029,7 @@ Then, we shall calculate:
      -0.0637   -0.5204
   ```
 
-  ==Here comes the problem: The minimum value that the simulator could take for P21 is 0.1.==
+  ==FIXME: Here comes the problem: The minimum value that the simulator could take for P21 is 0.1.==
 
 - **P31 P30:**
 
@@ -1068,7 +1067,7 @@ Then, we shall calculate:
   plot(vd(idx), y_fit, 'r--', 'DisplayName', 'Linear Fit');
   ```
 
-  ==The result is as follow. Here we ignored the imaginary part, AND the result IS affected:==
+  ==FIXME: The result is as follow. Here we ignored the imaginary part, AND the result IS affected:==
 
   <img src="assets/image17250717725520.png" alt="img" style="zoom:67%;" />
 
@@ -1079,7 +1078,7 @@ Then, we shall calculate:
     -0.2156 - 0.7854i   0.6075 + 1.5708i
   ```
 
-  ==Here we got the imaginary number, which could not be used in the simulator.==
+  ==FIXME: Here we got the imaginary number, which could not be used in the simulator.==
 
 #### Result of Extractions
 
