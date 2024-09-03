@@ -1,8 +1,8 @@
 # Characterization and Modeling of GaN HEMTs
 
-> The project of Tianyang (Eliot) Chen.
+> The project of Tianyang (Eliot) Chen;
 > <br>
-> Advisor: Patrick Fay;
+> Advisor: Patrick Fay.
 
 > During iSURE 2024;
 > <br>
